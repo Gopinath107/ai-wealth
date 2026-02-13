@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
@@ -53,6 +52,14 @@ const App: React.FC = () => {
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
+
+  // Enforce clean URL when not logged in
+  useEffect(() => {
+    if (!user && window.location.pathname !== '/') {
+      window.history.replaceState({}, '', '/');
+    }
+  }, [user]);
+
   const [portfolio, setPortfolio] = useState<any>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
