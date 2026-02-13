@@ -3,7 +3,7 @@
 // Set to true to enable real backend API integration
 const CONFIGURED_REAL_BACKEND = true;
 
-export const BASE_URL = "http://localhost:8080/api";
+export const BASE_URL = "https://ai-wealth-backend-jw5r.onrender.com/api";
 export const WS_BASE_URL = "ws://localhost:8080";
 
 // --- MARKET HOURS (IST) ---
