@@ -3,8 +3,12 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Portfolio, RebalancingSuggestion, InvestmentGoal, NewsItem, Asset, GoalRecommendation } from '../types';
 import { BASE_URL, ENDPOINTS, getHeaders, shouldUseBackend, isDemoMode, simulateDelay } from './apiConfig';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
-
+// Use import.meta.env for Vite and ensure we use the VITE_ prefix
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+if (!apiKey) {
+  console.error("CRITICAL: VITE_GEMINI_API_KEY is missing. AI features will fail.");
+}
+const ai = new GoogleGenAI({ apiKey });
 const ADVISOR_SYSTEM_INSTRUCTION = `You are DJ-AI, an expert financial analyst and wealth advisor.
 Your capabilities include portfolio analysis, market trend interpretation, and strategic investment planning.`;
 
