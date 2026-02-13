@@ -1,0 +1,7 @@
+{
+  "name": "Copy of DJ-AI Intelligent Wealth Advisor",
+  "description": "An AI-powered financial advisor dashboard that provides real-time portfolio analysis, investment insights, and personalized financial guidance using Google Gemini models.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
