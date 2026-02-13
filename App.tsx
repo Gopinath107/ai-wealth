@@ -51,10 +51,6 @@ const App: React.FC = () => {
   useEffect(() => {
     const onPopState = () => setCurrentView(getViewFromPath());
     window.addEventListener('popstate', onPopState);
-    // Set initial path if at root
-    if (window.location.pathname === '/' || window.location.pathname === '') {
-      window.history.replaceState({}, '', '/dashboard');
-    }
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
   const [portfolio, setPortfolio] = useState<any>(null);
@@ -71,6 +67,7 @@ const App: React.FC = () => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
       if (saved === 'dark' || saved === 'light') return saved;
+      // Default to dark mode if no preference saved
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     return 'light';
@@ -161,6 +158,9 @@ const App: React.FC = () => {
   const handleLogin = (responseUser: User) => {
     setUser(responseUser);
     loadUserData();
+    if (window.location.pathname === '/' || window.location.pathname === '') {
+      navigate(ViewState.Dashboard);
+    }
   };
 
   const handleLogout = async () => {
