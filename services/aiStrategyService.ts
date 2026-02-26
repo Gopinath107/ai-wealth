@@ -1,7 +1,7 @@
 
 import { getHeaders } from './apiConfig';
 
-const AI_STRATEGY_BASE_URL = 'http://localhost:8080';
+const AI_STRATEGY_BASE_URL = 'https://ai-wealth-backend-jw5r.onrender.com';
 
 // Request payload for AI Strategy API
 export interface AIStrategyRequest {
