@@ -44,12 +44,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followU
             processed = processed.replace(/<think>[\s\S]*?<\/think>/, '').trim();
         }
 
-        // Strip "## Follow-ups" / "Follow-ups" section from the content
+        // Strip "## Follow-ups" / "Follow-up Questions" section from the content
         // to prevent duplicate rendering (buttons are rendered separately)
+        // Handles: -, ‐, ‑, ‒, –, — (all dash/hyphen variants)
         const followUpPatterns = [
-            /\n##\s*Follow[-\s]?[Uu]ps[\s\S]*/i,
-            /\n\*\*Follow[-\s]?[Uu]ps\*\*[\s\S]*/i,
-            /\nFollow[-\s]?[Uu]ps\n[\s\S]*/i,
+            /\n#{1,3}\s*Follow[-\u2010\u2011\u2012\u2013\u2014\s]?[Uu]ps?(?:\s+[Qq]uestions?)?[\s\S]*/i,
+            /\n\*\*Follow[-\u2010\u2011\u2012\u2013\u2014\s]?[Uu]ps?(?:\s+[Qq]uestions?)?\*\*[\s\S]*/i,
+            /\nFollow[-\u2010\u2011\u2012\u2013\u2014\s]?[Uu]ps?(?:\s+[Qq]uestions?)?\n[\s\S]*/i,
         ];
         for (const pattern of followUpPatterns) {
             processed = processed.replace(pattern, '').trim();
