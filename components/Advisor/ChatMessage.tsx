@@ -1,15 +1,18 @@
 
 import React from 'react';
-import { User, Bot, Sparkles } from 'lucide-react';
+import { User, Bot, Sparkles, CornerDownRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { ChatMessageData } from '../../services/aiChatService';
 
 interface ChatMessageProps {
     message: ChatMessageData;
     isStreaming?: boolean;
+    followUps?: string[] | null;
+    onFollowUpClick?: (question: string) => void;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followUps, onFollowUpClick }) => {
     const isUser = message.role === 'user';
     const [isCopied, setIsCopied] = React.useState(false);
     const [isThinkingExpanded, setIsThinkingExpanded] = React.useState(false);
@@ -70,6 +73,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
                                 </div>
                             )}
                             <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
                                 components={{
                                     h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
                                     h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
@@ -94,7 +98,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
                                     blockquote: ({ children }) => <blockquote className="md-blockquote">{children}</blockquote>,
                                     strong: ({ children }) => <strong className="md-strong">{children}</strong>,
                                     em: ({ children }) => <em className="md-em">{children}</em>,
-                                    table: ({ children }) => <table className="md-table">{children}</table>,
+                                    table: ({ children }) => (
+                                        <div className="md-table-wrapper">
+                                            <table className="md-table">{children}</table>
+                                        </div>
+                                    ),
                                     thead: ({ children }) => <thead className="md-thead">{children}</thead>,
                                     tbody: ({ children }) => <tbody>{children}</tbody>,
                                     tr: ({ children }) => <tr className="md-tr">{children}</tr>,
@@ -109,6 +117,25 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
                     )}
                     {isStreaming && <span className="streaming-cursor" />}
                 </div>
+
+                {/* Follow-up Buttons */}
+                {!isUser && !isStreaming && followUps && followUps.length > 0 && (
+                    <div className="follow-ups-container">
+                        <div className="follow-ups-label">Follow-ups</div>
+                        <div className="follow-ups-list">
+                            {followUps.map((question, index) => (
+                                <button
+                                    key={index}
+                                    className="follow-up-btn"
+                                    onClick={() => onFollowUpClick?.(question)}
+                                >
+                                    <CornerDownRight size={14} className="follow-up-icon" />
+                                    <span>{question}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="message-footer">
                     <span className="message-time">{formatTime(message.createdAt)}</span>
