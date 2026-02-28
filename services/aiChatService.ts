@@ -19,6 +19,7 @@ export interface SendMessageResponse {
     sessionId: number;
     chatTitle: string;
     reply: string;
+    followUps: string[] | null;
     status: string;
 }
 
@@ -199,6 +200,7 @@ export const sendMessage = async (
             sessionId: data.sessionId,
             chatTitle: data.chatTitle || userMessage.slice(0, 30),
             reply: reply,
+            followUps: data.followUps || null,
             status: data.status || 'SUCCESS',
         };
     } catch (error) {
