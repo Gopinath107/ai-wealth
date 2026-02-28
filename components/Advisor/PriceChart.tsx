@@ -82,10 +82,9 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys }) => {
                 headers: getHeaders(),
             });
 
-            if (!response.ok) throw new Error('Failed to fetch candle data');
-
             const json = await response.json();
-            const candles: CandleData[] = json.data || json.content || [];
+            // Backend returns: { "result": { "candles": [...] }, "success": true }
+            const candles: CandleData[] = json.result?.candles || json.data || json.content || [];
 
             if (!candles || candles.length === 0) return [];
 
