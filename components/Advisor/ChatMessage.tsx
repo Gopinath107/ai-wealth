@@ -32,15 +32,30 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followU
         setTimeout(() => setIsCopied(false), 2000);
     };
 
-    // Extract thinking process if it exists (e.g., <think>...</think>)
+    // Extract thinking process and strip follow-up section
     const processContent = (content: string) => {
-        const thinkMatch = content.match(/<think>([\s\S]*?)<\/think>/);
+        let processed = content;
+
+        // Remove <think>...</think> blocks
+        const thinkMatch = processed.match(/<think>([\s\S]*?)<\/think>/);
+        let thinking: string | null = null;
         if (thinkMatch) {
-            const thinking = thinkMatch[1].trim();
-            const actualResponse = content.replace(/<think>[\s\S]*?<\/think>/, '').trim();
-            return { thinking, actualResponse };
+            thinking = thinkMatch[1].trim();
+            processed = processed.replace(/<think>[\s\S]*?<\/think>/, '').trim();
         }
-        return { thinking: null, actualResponse: content };
+
+        // Strip "## Follow-ups" / "Follow-ups" section from the content
+        // to prevent duplicate rendering (buttons are rendered separately)
+        const followUpPatterns = [
+            /\n##\s*Follow[-\s]?[Uu]ps[\s\S]*/i,
+            /\n\*\*Follow[-\s]?[Uu]ps\*\*[\s\S]*/i,
+            /\nFollow[-\s]?[Uu]ps\n[\s\S]*/i,
+        ];
+        for (const pattern of followUpPatterns) {
+            processed = processed.replace(pattern, '').trim();
+        }
+
+        return { thinking, actualResponse: processed };
     };
 
     const { thinking, actualResponse } = processContent(message.content);
