@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart, IChartApi, ISeriesApi, LineData, ColorType } from 'lightweight-charts';
+import { createChart, ColorType, AreaSeries } from 'lightweight-charts';
+import type { IChartApi, ISeriesApi, AreaSeriesOptions } from 'lightweight-charts';
 import { BASE_URL, ENDPOINTS, getHeaders } from '../../services/apiConfig';
 
 interface PriceChartProps {
@@ -35,7 +36,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys }) => {
     // Only render chart for the first instrument key
     const instrumentKey = instrumentKeys[0];
 
-    const fetchCandleData = async (range: TimeRange): Promise<LineData[]> => {
+    const fetchCandleData = async (range: TimeRange) => {
         try {
             const encodedKey = encodeURIComponent(instrumentKey);
             let url: string;
@@ -102,7 +103,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys }) => {
                 });
             }
 
-            // Convert to lightweight-charts LineData format
+            // Convert to lightweight-charts format
             return candles.map((c) => {
                 const time = Math.floor(new Date(c.timestamp).getTime() / 1000);
                 return {
@@ -146,8 +147,8 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys }) => {
             },
         });
 
-        // Add area series (like Google Finance)
-        const series = chart.addAreaSeries({
+        // v5 API: use chart.addSeries(AreaSeries, options) instead of chart.addAreaSeries()
+        const series = chart.addSeries(AreaSeries, {
             lineColor: '#22c55e',
             topColor: 'rgba(34, 197, 94, 0.3)',
             bottomColor: 'rgba(34, 197, 94, 0.02)',
@@ -161,7 +162,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys }) => {
         });
 
         chartRef.current = chart;
-        seriesRef.current = series;
+        seriesRef.current = series as any;
 
         // Handle resize
         const handleResize = () => {
@@ -186,13 +187,13 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys }) => {
 
         fetchCandleData(activeRange)
             .then((data) => {
-                if (data.length > 0 && seriesRef.current && chartRef.current) {
+                if (data && data.length > 0 && seriesRef.current && chartRef.current) {
                     seriesRef.current.setData(data);
                     chartRef.current.timeScale().fitContent();
 
                     // Update line color based on performance
-                    const firstVal = data[0].value;
-                    const lastVal = data[data.length - 1].value;
+                    const firstVal = (data[0] as any).value;
+                    const lastVal = (data[data.length - 1] as any).value;
                     const isPositive = lastVal >= firstVal;
 
                     seriesRef.current.applyOptions({
@@ -204,7 +205,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys }) => {
                             ? 'rgba(34, 197, 94, 0.02)'
                             : 'rgba(239, 68, 68, 0.02)',
                         priceLineColor: isPositive ? '#22c55e' : '#ef4444',
-                    });
+                    } as Partial<AreaSeriesOptions>);
                 } else {
                     setError('No chart data available');
                 }
