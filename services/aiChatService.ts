@@ -20,6 +20,7 @@ export interface SendMessageResponse {
     chatTitle: string;
     reply: string;
     followUps: string[] | null;
+    instrumentKeys: string[] | null;
     status: string;
 }
 
@@ -168,6 +169,8 @@ export const sendMessage = async (
             sessionId: newSessionId,
             chatTitle: title,
             reply: aiResponse,
+            followUps: null,
+            instrumentKeys: null,
             status: 'SUCCESS',
         };
     }
@@ -201,6 +204,7 @@ export const sendMessage = async (
             chatTitle: data.chatTitle || userMessage.slice(0, 30),
             reply: reply,
             followUps: data.followUps || null,
+            instrumentKeys: data.instrumentKeys || null,
             status: data.status || 'SUCCESS',
         };
     } catch (error) {
@@ -209,6 +213,8 @@ export const sendMessage = async (
             sessionId: sessionId || 0,
             chatTitle: userMessage.slice(0, 30),
             reply: 'Sorry, I encountered an error. Please try again.',
+            followUps: null,
+            instrumentKeys: null,
             status: 'ERROR',
         };
     }

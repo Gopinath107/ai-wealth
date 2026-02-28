@@ -4,15 +4,17 @@ import { User, Bot, Sparkles, CornerDownRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ChatMessageData } from '../../services/aiChatService';
+import PriceChart from './PriceChart';
 
 interface ChatMessageProps {
     message: ChatMessageData;
     isStreaming?: boolean;
     followUps?: string[] | null;
+    instrumentKeys?: string[] | null;
     onFollowUpClick?: (question: string) => void;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followUps, onFollowUpClick }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followUps, instrumentKeys, onFollowUpClick }) => {
     const isUser = message.role === 'user';
     const [isCopied, setIsCopied] = React.useState(false);
     const [isThinkingExpanded, setIsThinkingExpanded] = React.useState(false);
@@ -133,6 +135,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followU
                     )}
                     {isStreaming && <span className="streaming-cursor" />}
                 </div>
+
+                {/* Price Chart */}
+                {!isUser && !isStreaming && instrumentKeys && instrumentKeys.length > 0 && (
+                    <PriceChart instrumentKeys={instrumentKeys} />
+                )}
 
                 {/* Follow-up Buttons */}
                 {!isUser && !isStreaming && followUps && followUps.length > 0 && (

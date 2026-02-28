@@ -57,6 +57,7 @@ const Advisor: React.FC<AdvisorProps> = ({
     const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [lastFollowUps, setLastFollowUps] = useState<string[] | null>(null);
+    const [lastInstrumentKeys, setLastInstrumentKeys] = useState<string[] | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -199,8 +200,9 @@ const Advisor: React.FC<AdvisorProps> = ({
 
             await simulateTyping(response.reply, aiMsgId);
 
-            // Store follow-up suggestions from API response
+            // Store follow-up suggestions and instrument keys from API response
             setLastFollowUps(response.followUps || null);
+            setLastInstrumentKeys(response.instrumentKeys || null);
 
         } catch (error) {
             console.error('Error sending message:', error);
@@ -313,6 +315,7 @@ const Advisor: React.FC<AdvisorProps> = ({
                                         message={message}
                                         isStreaming={streamingMessageId === message.id}
                                         followUps={isLastAssistant ? lastFollowUps : null}
+                                        instrumentKeys={isLastAssistant ? lastInstrumentKeys : null}
                                         onFollowUpClick={handleSendMessage}
                                     />
                                 );
