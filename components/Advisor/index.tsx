@@ -56,6 +56,7 @@ const Advisor: React.FC<AdvisorProps> = ({
     const [isSending, setIsSending] = useState(false);
     const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [lastFollowUps, setLastFollowUps] = useState<string[] | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -198,6 +199,9 @@ const Advisor: React.FC<AdvisorProps> = ({
 
             await simulateTyping(response.reply, aiMsgId);
 
+            // Store follow-up suggestions from API response
+            setLastFollowUps(response.followUps || null);
+
         } catch (error) {
             console.error('Error sending message:', error);
             const errorMsg: ChatMessageData = {
@@ -298,13 +302,21 @@ const Advisor: React.FC<AdvisorProps> = ({
                         </div>
                     ) : (
                         <div className="messages-list">
-                            {messages.map((message) => (
-                                <ChatMessage
-                                    key={message.id}
-                                    message={message}
-                                    isStreaming={streamingMessageId === message.id}
-                                />
-                            ))}
+                            {messages.map((message, index) => {
+                                // Show follow-ups only on the LAST assistant message
+                                const isLastAssistant = streamingMessageId === null
+                                    && message.role === 'assistant'
+                                    && index === messages.length - 1;
+                                return (
+                                    <ChatMessage
+                                        key={message.id}
+                                        message={message}
+                                        isStreaming={streamingMessageId === message.id}
+                                        followUps={isLastAssistant ? lastFollowUps : null}
+                                        onFollowUpClick={handleSendMessage}
+                                    />
+                                );
+                            })}
 
                             {/* Typing indicator */}
                             {isSending && streamingMessageId === null && (
