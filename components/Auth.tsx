@@ -166,53 +166,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
              </div>
           )}
 
-          {(mode === 'LOGIN' || mode === 'SIGNUP') && (
-            <div className="space-y-3 pt-2">
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    setError('');
-                    setIsLoading(true);
-                    await api.auth.signInWithOAuth('google');
-                  } catch (err) {
-                    setError('Failed to initialize Google login.');
-                    setIsLoading(false);
-                  }
-                }}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
-                Continue with Google
-              </button>
-              
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    setError('');
-                    setIsLoading(true);
-                    await api.auth.signInWithOAuth('github');
-                  } catch (err) {
-                    setError('Failed to initialize GitHub login.');
-                    setIsLoading(false);
-                  }
-                }}
-                disabled={isLoading}
-                className="w-full flex items-center justify-center gap-3 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                <img src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" className="w-5 h-5 opacity-80" />
-                Continue with GitHub
-              </button>
 
-              <div className="flex items-center gap-4 py-4">
-                <div className="h-px bg-slate-200 flex-1"></div>
-                <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">OR EMAIL</span>
-                <div className="h-px bg-slate-200 flex-1"></div>
-              </div>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {mode === 'SIGNUP' && (
@@ -311,6 +265,54 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
               )}
             </button>
           </form>
+
+          {(mode === 'LOGIN' || mode === 'SIGNUP') && (
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-4 py-4">
+                <div className="h-px bg-slate-200 flex-1"></div>
+                <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">OR</span>
+                <div className="h-px bg-slate-200 flex-1"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    setError('');
+                    setIsLoading(true);
+                    await api.auth.signInWithOAuth('google');
+                  } catch (err) {
+                    setError('Failed to initialize Google login.');
+                    setIsLoading(false);
+                  }
+                }}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+                Continue with Google
+              </button>
+              
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    setError('');
+                    setIsLoading(true);
+                    await api.auth.signInWithOAuth('github');
+                  } catch (err) {
+                    setError('Failed to initialize GitHub login.');
+                    setIsLoading(false);
+                  }
+                }}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-3 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium text-slate-700 disabled:opacity-70 disabled:cursor-not-allowed"
+              >
+                <img src="https://www.svgrepo.com/show/512317/github-142.svg" alt="GitHub" className="w-5 h-5 opacity-80" />
+                Continue with GitHub
+              </button>
+            </div>
+          )}
 
           <div className="text-center pt-4">
             {mode === 'LOGIN' ? (
