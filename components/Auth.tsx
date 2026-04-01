@@ -71,7 +71,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="flex min-h-screen w-full overflow-hidden bg-white">
+    <div className="flex h-screen w-full overflow-hidden bg-white">
       
       {/* Left Side - Visuals */}
       <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative flex-col justify-between p-16 overflow-hidden">
@@ -119,8 +119,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-16 bg-white relative">
-        <div className="w-full max-w-md space-y-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-16 bg-white relative overflow-y-auto">
+        <div className="w-full max-w-md space-y-6">
           <div className="text-center lg:text-left">
             <h2 className="text-3xl font-bold text-slate-900">
               {mode === 'LOGIN' && 'Welcome Back'}
