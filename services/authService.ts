@@ -236,6 +236,10 @@ export const authService = {
   // 6. Social Login - Initiate
   signInWithOAuth: async (provider: 'google' | 'github') => {
     try {
+      if (!supabase) {
+        throw new Error('Social authentication is not configured. Please set Supabase environment variables.');
+      }
+
       // Clear old state just in case
       setDemoMode(false);
       localStorage.removeItem('userId');

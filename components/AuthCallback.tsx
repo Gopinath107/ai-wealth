@@ -16,6 +16,10 @@ const AuthCallback: React.FC<AuthCallbackProps> = ({ onLogin }) => {
     
     const processAuth = async () => {
       try {
+        if (!supabase) {
+          throw new Error('Social authentication is not configured.');
+        }
+
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) throw sessionError;
@@ -23,7 +27,7 @@ const AuthCallback: React.FC<AuthCallbackProps> = ({ onLogin }) => {
         if (!session) {
           // If no session is found, it's possible it's still being processed from hash fragment
           // We can let Supabase's internal listener grab it, or if it isn't there, we just fail gracefully
-          const { data: { subscription: _subscription } } = supabase.auth.onAuthStateChange(
+          const { data: { subscription: _subscription } } = supabase!.auth.onAuthStateChange(
             async (event, sessionState) => {
               if (event === 'SIGNED_IN' && sessionState && isMounted) {
                 const provider = sessionState.user?.app_metadata?.provider || 'unknown';
