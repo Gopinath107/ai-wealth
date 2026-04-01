@@ -38,6 +38,10 @@ const getViewFromPath = (): ViewState => {
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [appLoading, setAppLoading] = useState(false);
+  // Track OAuth-in-progress using state (not hash check, which doesn't re-render)
+  const [isOAuthLoading, setIsOAuthLoading] = useState<boolean>(
+    !!(window.location.hash && window.location.hash.includes('access_token'))
+  );
 
   const [currentView, setCurrentView] = useState<ViewState>(getViewFromPath);
 
@@ -55,22 +59,60 @@ const App: React.FC = () => {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
-  // ── Global Supabase OAuth listener ────────────────────────────
-  // Handles the case where Supabase redirects to gaiadvisor.in/#access_token=...
-  // (root domain) after Google/GitHub OAuth. Without this, the landing page
-  // would receive the token and the user would never reach the dashboard.
+  // ── Global Supabase OAuth handler ─────────────────────────────
+  // Two-pronged approach to handle race conditions:
+  //   1. getSession() on mount: catches the case where Supabase processes
+  //      the #access_token hash BEFORE our onAuthStateChange listener registers.
+  //   2. onAuthStateChange: catches normal SIGNED_IN events.
+  // Both paths: call backend, then handleLogin. On failure: show login form.
+  const processSupabaseSession = useCallback(async (session: any) => {
+    if (!session || user) return;
+    setIsOAuthLoading(true);
+    try {
+      const provider = session.user?.app_metadata?.provider || 'google';
+      const supabaseToken = session.access_token;
+      try {
+        // Primary: call backend for JWT
+        const authResponse = await api.auth.handleAuthCallback(supabaseToken, provider);
+        handleLogin(authResponse.user);
+      } catch (backendErr) {
+        // Fallback: backend unreachable (cold start, etc.) — build user from Supabase session
+        console.warn('[App] Backend call failed, using Supabase session as fallback:', backendErr);
+        const fbUser: User = {
+          id: session.user.id,
+          fullName: session.user.user_metadata?.full_name ||
+                    session.user.user_metadata?.name ||
+                    session.user.email?.split('@')[0] || 'User',
+          email: session.user.email || '',
+          avatar: session.user.user_metadata?.avatar_url ||
+                  session.user.user_metadata?.picture || undefined,
+        };
+        handleLogin(fbUser);
+      }
+    } catch (err) {
+      console.error('[App] OAuth processing error:', err);
+      setIsOAuthLoading(false); // Stop spinner → show login form
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) { setIsOAuthLoading(false); return; }
+
+    // 1. Immediately check for existing session (race condition fix)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        processSupabaseSession(session);
+      } else {
+        setIsOAuthLoading(false);
+      }
+    });
+
+    // 2. Subscribe for future events (normal OAuth flow)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session && !user) {
-          try {
-            const provider = session.user?.app_metadata?.provider || 'google';
-            const authResponse = await api.auth.handleAuthCallback(session.access_token, provider);
-            handleLogin(authResponse.user);
-          } catch (err) {
-            console.error('[App] Global OAuth callback error:', err);
-          }
+      async (_event, session) => {
+        if (_event === 'SIGNED_IN' && session) {
+          await processSupabaseSession(session);
         }
       }
     );
@@ -282,9 +324,8 @@ const App: React.FC = () => {
     if (window.location.pathname === '/auth/callback') {
       return <AuthCallback onLogin={handleLogin} />;
     }
-    // Check if we have a hash with access_token (OAuth landing at root)
-    // Show a brief loading spinner while the onAuthStateChange listener processes it
-    if (window.location.hash && window.location.hash.includes('access_token')) {
+    // Show spinner while OAuth is being processed (state-based, not hash-based)
+    if (isOAuthLoading) {
       return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50">
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col items-center">
