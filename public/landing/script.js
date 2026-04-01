@@ -1,5 +1,19 @@
 /* ── script.js ── */
 
+// ── OAuth Guard ──────────────────────────────────────────────────────────────
+// Supabase redirects to gaiadvisor.in/#access_token=... after Google/GitHub login.
+// Since / serves this landing page, we must forward the token to the React app.
+(function () {
+  var hash = window.location.hash;
+  if (hash && hash.includes('access_token')) {
+    // Forward to /login with the full hash fragment so the React SPA can
+    // pick it up via supabase.auth.onAuthStateChange and complete sign-in.
+    window.location.replace('/login' + hash);
+    // Throw to stop rest of script from running during redirect
+    throw new Error('Redirecting to React app for OAuth...');
+  }
+})();
+
 // ── Navbar scroll effect ──
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
