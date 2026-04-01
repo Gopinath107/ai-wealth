@@ -102,11 +102,11 @@
         </div>
         <div class="hero-trust">
           <div class="trust-avatars">
-            <img src="https://i.pravatar.cc/36?img=1" alt="user" />
-            <img src="https://i.pravatar.cc/36?img=2" alt="user" />
-            <img src="https://i.pravatar.cc/36?img=5" alt="user" />
-            <img src="https://i.pravatar.cc/36?img=8" alt="user" />
-            <img src="https://i.pravatar.cc/36?img=11" alt="user" />
+            <div class="av" style="background:#6366f1">A</div>
+            <div class="av" style="background:#ec4899">P</div>
+            <div class="av" style="background:#10b981">R</div>
+            <div class="av" style="background:#f59e0b">K</div>
+            <div class="av" style="background:#3b82f6">V</div>
           </div>
           <span>Trusted by <strong>12,000+</strong> investors across India</span>
         </div>
@@ -205,6 +205,7 @@
 
       <div class="features-grid">
 
+        <!-- Wide card 1 -->
         <div class="feature-card feature-wide reveal">
           <div class="feat-left">
             <div class="feat-icon icon-blue">
@@ -213,36 +214,47 @@
             <h3>AI Portfolio Advisor</h3>
             <p>Get personalized buy/sell recommendations powered by Gemini AI, trained on decades of Indian market data.</p>
           </div>
-          <div class="feat-right">
-            <img src="https://images.unsplash.com/photo-1611974765270-ca1258634369?w=500&auto=format&fit=crop&q=80" alt="AI Portfolio" loading="lazy"/>
+          <div class="feat-visual fv-blue">
+            <div class="fv-chart">
+              <svg viewBox="0 0 200 80" preserveAspectRatio="none">
+                <defs><linearGradient id="fg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6366f1" stop-opacity="0.5"/><stop offset="100%" stop-color="#6366f1" stop-opacity="0"/></linearGradient></defs>
+                <path d="M0,65 C20,55 40,30 60,25 S90,15 110,20 S150,35 170,22 S190,8 200,4" fill="none" stroke="#6366f1" stroke-width="2.5"/>
+                <path d="M0,65 C20,55 40,30 60,25 S90,15 110,20 S150,35 170,22 S190,8 200,4 L200,80 L0,80 Z" fill="url(#fg1)"/>
+              </svg>
+            </div>
+            <div class="fv-badge">📊 BUY Signal — RELIANCE ↑8.9%</div>
           </div>
         </div>
 
+        <!-- Small card 1 -->
         <div class="feature-card reveal delay-1">
           <div class="feat-icon icon-green">
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           </div>
           <h3>Real-Time Market Data</h3>
-          <p>Live NSE/BSE feeds, updated every second with price alerts and market movers at your fingertips.</p>
-          <div class="feat-badge">Live</div>
+          <p>Live NSE/BSE feeds updated every second with price alerts and market movers at your fingertips.</p>
+          <div class="feat-badge-pill green-pill">● LIVE</div>
         </div>
 
+        <!-- Small card 2 -->
         <div class="feature-card reveal delay-2">
           <div class="feat-icon icon-orange">
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <h3>Goal-Based Planning</h3>
-          <p>Set financial goals — retirement, education, home — and get a step-by-step investment roadmap.</p>
+          <p>Set financial goals — retirement, education, home — and get a step-by-step AI roadmap to reach them.</p>
         </div>
 
+        <!-- Small card 3 -->
         <div class="feature-card reveal delay-1">
           <div class="feat-icon icon-purple">
             <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <h3>Bank-Grade Security</h3>
-          <p>256-bit encryption, 2FA, and read-only broker integration — your money and data stays safe.</p>
+          <p>256-bit encryption, 2FA, and read-only broker integration — your money and data stays safe, always.</p>
         </div>
 
+        <!-- Wide card 2 -->
         <div class="feature-card feature-wide reveal delay-2">
           <div class="feat-left">
             <div class="feat-icon icon-pink">
@@ -250,10 +262,23 @@
             </div>
             <h3>AI Financial News</h3>
             <p>Curated market news analyzed by AI — get summaries, sentiment scores, and impact ratings for your holdings.</p>
-            <a href="https://gaiadvisor.in" class="feat-link">Try it now →</a>
+            <a href="/login" class="feat-link">Try it now →</a>
           </div>
-          <div class="feat-right">
-            <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=500&auto=format&fit=crop&q=80" alt="Financial News" loading="lazy"/>
+          <div class="feat-visual fv-pink">
+            <div class="news-items">
+              <div class="news-item">
+                <span class="news-dot dot-green"></span>
+                <span class="news-txt"><strong>BULLISH</strong> — RBI rate hold boosts banking stocks</span>
+              </div>
+              <div class="news-item">
+                <span class="news-dot dot-red"></span>
+                <span class="news-txt"><strong>BEARISH</strong> — FII outflows continue for 3rd week</span>
+              </div>
+              <div class="news-item">
+                <span class="news-dot dot-yellow"></span>
+                <span class="news-txt"><strong>NEUTRAL</strong> — Q4 results season begins Monday</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -263,28 +288,37 @@
 
   <!-- ─── STATS ─── -->
   <section class="stats-section" id="stats">
-    <div class="stats-bg">
-      <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=1400&auto=format&fit=crop&q=80" alt="trading floor" loading="lazy"/>
-      <div class="stats-overlay"></div>
-    </div>
+    <div class="stats-bg-gradient"></div>
     <div class="section-inner">
       <div class="section-label reveal" style="color:rgba(255,255,255,0.7)">NUMBERS</div>
       <h2 class="section-title reveal" style="color:#fff">Results that speak<br/><span style="color:#a5b4fc">for themselves</span></h2>
       <div class="stats-grid">
         <div class="stat-card reveal">
-          <span class="stat-num" data-count="12000">0</span><span class="stat-suffix">+</span>
+          <div class="stat-emoji">👥</div>
+          <div class="stat-numrow">
+            <span class="stat-num" data-count="12000">0</span><span class="stat-suffix">+</span>
+          </div>
           <span class="stat-lbl">Active Investors</span>
         </div>
         <div class="stat-card reveal delay-1">
-          <span class="stat-num" data-count="94">0</span><span class="stat-suffix">%</span>
+          <div class="stat-emoji">🎯</div>
+          <div class="stat-numrow">
+            <span class="stat-num" data-count="94">0</span><span class="stat-suffix">%</span>
+          </div>
           <span class="stat-lbl">AI Accuracy Rate</span>
         </div>
         <div class="stat-card reveal delay-2">
-          <span>₹</span><span class="stat-num" data-count="480">0</span><span class="stat-suffix">Cr+</span>
+          <div class="stat-emoji">💰</div>
+          <div class="stat-numrow">
+            <span class="stat-prefix">₹</span><span class="stat-num" data-count="480">0</span><span class="stat-suffix"> Cr+</span>
+          </div>
           <span class="stat-lbl">Assets Tracked</span>
         </div>
         <div class="stat-card reveal delay-3">
-          <span class="stat-num" data-count="24">0</span><span class="stat-suffix">/7</span>
+          <div class="stat-emoji">⚡</div>
+          <div class="stat-numrow">
+            <span class="stat-num" data-count="24">0</span><span class="stat-suffix">/7</span>
+          </div>
           <span class="stat-lbl">Market Monitoring</span>
         </div>
       </div>
@@ -302,8 +336,8 @@
         <div class="step reveal">
           <div class="step-num">01</div>
           <div class="step-body">
-            <div class="step-img">
-              <img src="https://images.unsplash.com/photo-1633158829585-23ba8f7c8caf?w=500&auto=format&fit=crop&q=80" alt="Create account" loading="lazy"/>
+            <div class="step-img step-img-blue">
+              <svg width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:#4f46e5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
             <div class="step-text">
               <h3>Create Your Account</h3>
@@ -318,16 +352,16 @@
               <h3>Tell AI Your Goals</h3>
               <p>Share your risk appetite, time horizon, and financial targets. Our AI builds your personalized strategy.</p>
             </div>
-            <div class="step-img">
-              <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&auto=format&fit=crop&q=80" alt="Set goals" loading="lazy"/>
+            <div class="step-img step-img-purple">
+              <svg width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:#8b5cf6"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
             </div>
           </div>
         </div>
         <div class="step reveal delay-2">
           <div class="step-num">03</div>
           <div class="step-body">
-            <div class="step-img">
-              <img src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=500&auto=format&fit=crop&q=80" alt="Track wealth" loading="lazy"/>
+            <div class="step-img step-img-green">
+              <svg width="52" height="52" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:#10b981"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
             </div>
             <div class="step-text">
               <h3>Watch Your Wealth Grow</h3>
@@ -350,66 +384,48 @@
           <div class="stars">★★★★★</div>
           <p>"DJ-AI doubled my portfolio returns in 6 months. The AI suggestions are incredibly accurate and easy to follow."</p>
           <div class="testi-author">
-            <img src="https://i.pravatar.cc/48?img=3" alt="Arjun"/>
-            <div>
-              <strong>Arjun Mehta</strong>
-              <span>Software Engineer, Bangalore</span>
-            </div>
+            <div class="testi-av" style="background:#6366f1">A</div>
+            <div><strong>Arjun Mehta</strong><span>Software Engineer, Bangalore</span></div>
           </div>
         </div>
         <div class="testi-card reveal delay-1">
           <div class="stars">★★★★★</div>
-          <p>"I was a complete beginner. The AI explained everything in simple terms and helped me build a ₹5L portfolio from scratch."</p>
+          <p>"I was a complete beginner. The AI explained everything in simple terms and helped me build a strong portfolio."</p>
           <div class="testi-author">
-            <img src="https://i.pravatar.cc/48?img=9" alt="Priya"/>
-            <div>
-              <strong>Priya Venkatesh</strong>
-              <span>Teacher, Chennai</span>
-            </div>
+            <div class="testi-av" style="background:#ec4899">P</div>
+            <div><strong>Priya Venkatesh</strong><span>Teacher, Chennai</span></div>
           </div>
         </div>
         <div class="testi-card reveal delay-2">
           <div class="stars">★★★★★</div>
-          <p>"The real-time alerts saved me from a massive loss during the market correction. This app is a life saver for retail investors."</p>
+          <p>"The real-time alerts saved me from a massive loss during the market correction. Truly a life saver!"</p>
           <div class="testi-author">
-            <img src="https://i.pravatar.cc/48?img=14" alt="Rahul"/>
-            <div>
-              <strong>Rahul Sharma</strong>
-              <span>Business Owner, Delhi</span>
-            </div>
+            <div class="testi-av" style="background:#10b981">R</div>
+            <div><strong>Rahul Sharma</strong><span>Business Owner, Delhi</span></div>
           </div>
         </div>
         <div class="testi-card reveal delay-1">
           <div class="stars">★★★★★</div>
-          <p>"Best investment I've made this year — and I mean signing up for DJ-AI! The goal planning feature is outstanding."</p>
+          <p>"Best investment I've made this year — signing up for DJ-AI! The goal planning feature is outstanding."</p>
           <div class="testi-author">
-            <img src="https://i.pravatar.cc/48?img=20" alt="Kavya"/>
-            <div>
-              <strong>Kavya Nair</strong>
-              <span>Doctor, Kochi</span>
-            </div>
+            <div class="testi-av" style="background:#f59e0b">K</div>
+            <div><strong>Kavya Nair</strong><span>Doctor, Kochi</span></div>
           </div>
         </div>
         <div class="testi-card reveal delay-2">
           <div class="stars">★★★★★</div>
-          <p>"I've tried many platforms but none come close to the AI insights and UI quality of DJ-AI Advisor. Absolutely recommend."</p>
+          <p>"I've tried many platforms but none come close to the AI insights and UI quality of DJ-AI Advisor."</p>
           <div class="testi-author">
-            <img src="https://i.pravatar.cc/48?img=25" alt="Vikram"/>
-            <div>
-              <strong>Vikram Patel</strong>
-              <span>CA, Mumbai</span>
-            </div>
+            <div class="testi-av" style="background:#8b5cf6">V</div>
+            <div><strong>Vikram Patel</strong><span>CA, Mumbai</span></div>
           </div>
         </div>
         <div class="testi-card reveal delay-3">
           <div class="stars">★★★★★</div>
-          <p>"The portfolio analysis is sharp and the AI chat is like having a personal financial advisor available 24/7."</p>
+          <p>"The portfolio analysis is sharp and the AI chat is like having a personal financial advisor 24/7."</p>
           <div class="testi-author">
-            <img src="https://i.pravatar.cc/48?img=32" alt="Sneha"/>
-            <div>
-              <strong>Sneha Reddy</strong>
-              <span>Data Scientist, Hyderabad</span>
-            </div>
+            <div class="testi-av" style="background:#14b8a6">S</div>
+            <div><strong>Sneha Reddy</strong><span>Data Scientist, Hyderabad</span></div>
           </div>
         </div>
       </div>
