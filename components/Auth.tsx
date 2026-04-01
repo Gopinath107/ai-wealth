@@ -74,7 +74,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     <div className="flex h-screen w-full overflow-hidden bg-white">
       
       {/* Left Side - Visuals */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative flex-col justify-between p-16 overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative flex-col justify-between p-10 xl:p-16 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute top-[-20%] left-[-20%] w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
@@ -88,25 +88,25 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             <span className="text-2xl font-bold text-white tracking-tight">DJ-AI Advisor</span>
           </div>
           
-          <h1 className="text-5xl font-bold text-white leading-tight mb-6">
+          <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-4">
             Wealth management <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
               reimagined for you.
             </span>
           </h1>
-          <p className="text-slate-400 text-lg max-w-md leading-relaxed">
+          <p className="text-slate-400 text-base xl:text-lg max-w-md leading-relaxed">
             Harness the power of artificial intelligence to analyze markets, optimize your portfolio, and reach your financial goals faster.
           </p>
         </div>
 
         <div className="relative z-10">
-            <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-5 rounded-2xl">
+            <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-4 rounded-2xl">
                     <PieChart className="w-8 h-8 text-blue-400 mb-3" />
                     <h3 className="text-white font-semibold mb-1">Smart Analytics</h3>
                     <p className="text-slate-400 text-sm">Real-time portfolio tracking.</p>
                 </div>
-                <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-5 rounded-2xl">
+                <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-4 rounded-2xl">
                     <ShieldCheck className="w-8 h-8 text-emerald-400 mb-3" />
                     <h3 className="text-white font-semibold mb-1">Secure & Private</h3>
                     <p className="text-slate-400 text-sm">Bank-grade encryption.</p>
@@ -119,16 +119,16 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-16 bg-white relative overflow-y-auto">
-        <div className="w-full max-w-md space-y-6">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-10 bg-white relative overflow-y-auto">
+        <div className="w-full max-w-md space-y-4">
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl font-bold text-slate-900">
+            <h2 className="text-2xl font-bold text-slate-900">
               {mode === 'LOGIN' && 'Welcome Back'}
               {mode === 'SIGNUP' && 'Create Account'}
               {mode === 'FORGOT_PASSWORD' && 'Reset Password'}
               {mode === 'RESET_PASSWORD' && 'New Password'}
             </h2>
-            <p className="mt-2 text-slate-500">
+            <p className="mt-1 text-slate-500 text-sm">
               {mode === 'LOGIN' && 'Enter your credentials to access your account.'}
               {mode === 'SIGNUP' && 'Start your journey to financial freedom today.'}
               {mode === 'FORGOT_PASSWORD' && 'Enter your email to receive a reset token.'}
@@ -137,21 +137,21 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           </div>
 
           {error && (
-            <div className="p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-2 animate-fade-in">
+            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-2 animate-fade-in">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
               {error}
             </div>
           )}
           
           {successMsg && (
-            <div className="p-4 bg-emerald-50 text-emerald-600 text-sm rounded-xl border border-emerald-100 flex items-center gap-2 animate-fade-in">
+            <div className="p-3 bg-emerald-50 text-emerald-600 text-sm rounded-xl border border-emerald-100 flex items-center gap-2 animate-fade-in">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
               {successMsg}
             </div>
           )}
 
           {mode === 'LOGIN' && (
-             <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
+             <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-3 flex items-center justify-between">
                 <div>
                     <h4 className="font-bold text-indigo-900 text-sm">New here?</h4>
                     <p className="text-xs text-indigo-600/80">Try out the platform with a demo account.</p>
@@ -168,7 +168,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
 
 
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {mode === 'SIGNUP' && (
               <div className="space-y-1.5">
                 <label className="text-sm font-semibold text-slate-700">Full Name</label>
@@ -177,7 +177,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   <input 
                     type="text" 
                     required
-                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium placeholder:text-slate-400"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium placeholder:text-slate-400"
                     placeholder="John Doe"
                     value={formData.name}
                     onChange={e => setFormData({...formData, name: e.target.value})}
@@ -194,7 +194,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   <input 
                     type="email" 
                     required
-                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium placeholder:text-slate-400"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium placeholder:text-slate-400"
                     placeholder="john@example.com"
                     value={formData.email}
                     onChange={e => setFormData({...formData, email: e.target.value})}
@@ -218,7 +218,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                   <input 
                     type="password" 
                     required
-                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium placeholder:text-slate-400"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium placeholder:text-slate-400"
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={e => setFormData({...formData, password: e.target.value})}
@@ -235,7 +235,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     <input 
                         type="password" 
                         required
-                        className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium placeholder:text-slate-400"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-900 font-medium placeholder:text-slate-400"
                         placeholder="New strong password"
                         value={formData.newPassword}
                         onChange={e => setFormData({...formData, newPassword: e.target.value})}
@@ -247,7 +247,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             <button 
               type="submit" 
               disabled={isLoading}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-bold text-lg transition-all transform hover:translate-y-[-1px] active:translate-y-[1px] shadow-xl shadow-slate-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-bold text-base transition-all transform hover:translate-y-[-1px] active:translate-y-[1px] shadow-xl shadow-slate-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
             >
               {isLoading ? (
                 <>
@@ -267,8 +267,8 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           </form>
 
           {(mode === 'LOGIN' || mode === 'SIGNUP') && (
-            <div className="space-y-3 pt-2">
-              <div className="flex items-center gap-4 py-4">
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center gap-4 py-2">
                 <div className="h-px bg-slate-200 flex-1"></div>
                 <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">OR</span>
                 <div className="h-px bg-slate-200 flex-1"></div>
@@ -314,7 +314,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             </div>
           )}
 
-          <div className="text-center pt-4">
+          <div className="text-center pt-2">
             {mode === 'LOGIN' ? (
                 <p className="text-slate-500">
                 Don't have an account?
