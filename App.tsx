@@ -8,6 +8,7 @@ import Goals from './components/Goals';
 import LiveVoiceMode from './components/LiveVoiceMode';
 import Settings from './components/Settings';
 import Auth from './components/Auth';
+import AuthCallback from './components/AuthCallback';
 import Advisor from './components/Advisor';
 import { ViewState, Asset, WatchlistItem, Transaction, AssetType, PriceAlert, RebalancingSuggestion, User } from './types';
 import { api } from './services/api';
@@ -251,6 +252,9 @@ const App: React.FC = () => {
   };
 
   if (!user) {
+    if (window.location.pathname === '/auth/callback') {
+      return <AuthCallback onLogin={handleLogin} />;
+    }
     return <Auth onLogin={handleLogin} />;
   }
 

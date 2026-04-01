@@ -1,7 +1,7 @@
-
 import { AuthResponse } from '../types';
 import { BASE_URL, setToken, clearToken, getHeaders, simulateDelay, shouldUseBackend, setDemoMode } from './apiConfig';
 import { DEMO_USER, isDemoCredentials } from '../config/demoUser';
+import { supabase } from './supabaseClient';
 
 /**
  * Helper: Hash password using SHA-256 before sending to network.
@@ -229,6 +229,77 @@ export const authService = {
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('Backend not reachable. Please ensure the server is running at ' + BASE_URL);
       }
+      throw error;
+    }
+  },
+
+  // 6. Social Login - Initiate
+  signInWithOAuth: async (provider: 'google' | 'github') => {
+    try {
+      // Clear old state just in case
+      setDemoMode(false);
+      localStorage.removeItem('userId');
+      clearToken();
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('[Auth] OAuth initiation error:', error);
+      throw error;
+    }
+  },
+
+  // 7. Social Login - Callback Verification
+  handleAuthCallback: async (supabaseToken: string, provider: string): Promise<AuthResponse> => {
+    console.log(`[Auth] Handling ${provider} callback with token verify`);
+    
+    try {
+      const res = await fetch(`${BASE_URL}/auth/social-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider, supabaseToken })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => 'Unknown error');
+        console.error('[Auth] Social login failed:', res.status, errText);
+        throw new Error(`Social login failed: Backend returned ${res.status}`);
+      }
+
+      const data: ApiResponse<{ token: string; userId?: number; fullName?: string; email?: string; user?: any }> = await res.json();
+
+      if (!data.success) {
+        console.error('[Auth] Social login API returned error:', data.errors);
+        throw new Error(data.errors?.[0] || 'Social login processing failed');
+      }
+
+      console.log('[Auth] Social login successful, setting backend JWT');
+      setToken(data.result.token);
+
+      const userId = data.result.userId;
+      const userObj = {
+        id: userId || 1, 
+        fullName: data.result.fullName || data.result.user?.fullName || '',
+        email: data.result.email || data.result.user?.email || ''
+      };
+
+      if (userId) {
+        localStorage.setItem('userId', String(userId));
+        console.log('[Auth] Stored userId in localStorage:', userId);
+      }
+
+      return {
+        token: data.result.token,
+        user: userObj
+      };
+    } catch (error) {
+      console.error('[Auth] Backend social login error:', error);
       throw error;
     }
   }
