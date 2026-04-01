@@ -14,6 +14,7 @@ import { ViewState, Asset, WatchlistItem, Transaction, AssetType, PriceAlert, Re
 import { api } from './services/api';
 import * as chartDataService from './services/chartDataService';
 import { isMarketOpen } from './services/apiConfig';
+import { supabase } from './services/supabaseClient';
 
 // ── Route mapping ──────────────────────────────────────────────
 const VIEW_TO_PATH: Record<ViewState, string> = {
@@ -52,6 +53,29 @@ const App: React.FC = () => {
     const onPopState = () => setCurrentView(getViewFromPath());
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  // ── Global Supabase OAuth listener ────────────────────────────
+  // Handles the case where Supabase redirects to gaiadvisor.in/#access_token=...
+  // (root domain) after Google/GitHub OAuth. Without this, the landing page
+  // would receive the token and the user would never reach the dashboard.
+  useEffect(() => {
+    if (!supabase) return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session && !user) {
+          try {
+            const provider = session.user?.app_metadata?.provider || 'google';
+            const authResponse = await api.auth.handleAuthCallback(session.access_token, provider);
+            handleLogin(authResponse.user);
+          } catch (err) {
+            console.error('[App] Global OAuth callback error:', err);
+          }
+        }
+      }
+    );
+    return () => subscription.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Enforce clean URL when not logged in
@@ -257,6 +281,19 @@ const App: React.FC = () => {
   if (!user) {
     if (window.location.pathname === '/auth/callback') {
       return <AuthCallback onLogin={handleLogin} />;
+    }
+    // Check if we have a hash with access_token (OAuth landing at root)
+    // Show a brief loading spinner while the onAuthStateChange listener processes it
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50">
+          <div className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col items-center">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <h2 className="text-xl font-bold text-slate-800">Signing you in...</h2>
+            <p className="text-slate-500 mt-2 text-sm text-center">Please wait while we verify your account.</p>
+          </div>
+        </div>
+      );
     }
     // Show auth screen for /login or / or any unmatched route
     return <Auth onLogin={handleLogin} />;
