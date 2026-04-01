@@ -71,16 +71,16 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="flex min-h-screen w-full overflow-hidden bg-white">
+    <div className="flex h-screen w-full overflow-hidden bg-white">
       
       {/* Left Side - Visuals */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative flex-col justify-between p-16 overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute top-[-20%] left-[-20%] w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://images.unsplash.com/photo-1611974765270-ca1258634369?q=80&w=2664&auto=format&fit=crop')] bg-cover opacity-10 mix-blend-overlay"></div>
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative flex-col justify-between p-16 overflow-y-auto overflow-x-hidden">
+        {/* Animated Background Elements (Set fixed height to prevent background from stretching weirdly on scroll) */}
+        <div className="fixed top-[-20%] left-[-20%] w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="fixed bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="fixed top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://images.unsplash.com/photo-1611974765270-ca1258634369?q=80&w=2664&auto=format&fit=crop')] bg-cover opacity-10 mix-blend-overlay"></div>
 
-        <div className="relative z-10">
+        <div className="relative z-10 pt-4">
           <div className="flex items-center gap-3 mb-6">
             <div className="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-900/50">
                <TrendingUp className="w-6 h-6 text-white" />
@@ -99,7 +99,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           </p>
         </div>
 
-        <div className="relative z-10">
+        <div className="relative z-10 mt-12 pb-4">
             <div className="grid grid-cols-2 gap-6 mb-8">
                 <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-5 rounded-2xl">
                     <PieChart className="w-8 h-8 text-blue-400 mb-3" />
@@ -119,7 +119,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       </div>
 
       {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-16 bg-white relative">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-16 bg-white relative overflow-hidden h-full">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:text-left">
             <h2 className="text-3xl font-bold text-slate-900">
