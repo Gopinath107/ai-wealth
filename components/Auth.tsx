@@ -74,42 +74,42 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     <div className="flex h-screen w-full overflow-hidden bg-white">
       
       {/* Left Side - Visuals */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative flex-col justify-between p-10 xl:p-16 overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative flex-col justify-between p-8 xl:p-12 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute top-[-20%] left-[-20%] w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://images.unsplash.com/photo-1611974765270-ca1258634369?q=80&w=2664&auto=format&fit=crop')] bg-cover opacity-10 mix-blend-overlay"></div>
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-blue-600 p-2.5 rounded-xl shadow-lg shadow-blue-900/50">
-               <TrendingUp className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-900/50">
+               <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold text-white tracking-tight">DJ-AI Advisor</span>
+            <span className="text-xl font-bold text-white tracking-tight">DJ-AI Advisor</span>
           </div>
           
-          <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-4">
+          <h1 className="text-3xl xl:text-4xl font-bold text-white leading-tight mb-3">
             Wealth management <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
               reimagined for you.
             </span>
           </h1>
-          <p className="text-slate-400 text-base xl:text-lg max-w-md leading-relaxed">
+          <p className="text-slate-400 text-sm xl:text-base max-w-md leading-relaxed">
             Harness the power of artificial intelligence to analyze markets, optimize your portfolio, and reach your financial goals faster.
           </p>
         </div>
 
         <div className="relative z-10">
-            <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-4 rounded-2xl">
-                    <PieChart className="w-8 h-8 text-blue-400 mb-3" />
-                    <h3 className="text-white font-semibold mb-1">Smart Analytics</h3>
-                    <p className="text-slate-400 text-sm">Real-time portfolio tracking.</p>
+            <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-3 rounded-2xl">
+                    <PieChart className="w-7 h-7 text-blue-400 mb-2" />
+                    <h3 className="text-white font-semibold mb-0.5 text-sm">Smart Analytics</h3>
+                    <p className="text-slate-400 text-xs">Real-time portfolio tracking.</p>
                 </div>
-                <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-4 rounded-2xl">
-                    <ShieldCheck className="w-8 h-8 text-emerald-400 mb-3" />
-                    <h3 className="text-white font-semibold mb-1">Secure & Private</h3>
-                    <p className="text-slate-400 text-sm">Bank-grade encryption.</p>
+                <div className="bg-white/5 backdrop-blur-lg border border-white/10 p-3 rounded-2xl">
+                    <ShieldCheck className="w-7 h-7 text-emerald-400 mb-2" />
+                    <h3 className="text-white font-semibold mb-0.5 text-sm">Secure & Private</h3>
+                    <p className="text-slate-400 text-xs">Bank-grade encryption.</p>
                 </div>
             </div>
             
