@@ -56,8 +56,12 @@ const App: React.FC = () => {
 
   // Enforce clean URL when not logged in
   useEffect(() => {
-    if (!user && window.location.pathname !== '/') {
-      window.history.replaceState({}, '', '/');
+    if (!user) {
+      const path = window.location.pathname;
+      // Keep /auth/callback and /login paths as-is - needed for OAuth flow and routing
+      if (path !== '/' && path !== '/login' && path !== '/auth/callback') {
+        window.history.replaceState({}, '', '/login');
+      }
     }
   }, [user]);
 
@@ -166,9 +170,8 @@ const App: React.FC = () => {
   const handleLogin = (responseUser: User) => {
     setUser(responseUser);
     loadUserData();
-    if (window.location.pathname === '/' || window.location.pathname === '') {
-      navigate(ViewState.Dashboard);
-    }
+    // Always navigate to dashboard after any login (OAuth, email, demo)
+    navigate(ViewState.Dashboard);
   };
 
   const handleLogout = async () => {
@@ -255,6 +258,7 @@ const App: React.FC = () => {
     if (window.location.pathname === '/auth/callback') {
       return <AuthCallback onLogin={handleLogin} />;
     }
+    // Show auth screen for /login or / or any unmatched route
     return <Auth onLogin={handleLogin} />;
   }
 
