@@ -42,6 +42,9 @@ const App: React.FC = () => {
   const [isOAuthLoading, setIsOAuthLoading] = useState<boolean>(
     !!(window.location.hash && window.location.hash.includes('access_token'))
   );
+  // Ref mirrors user state so async callbacks always read the CURRENT value
+  // (avoids stale closure bug in useCallback/useEffect with [] deps)
+  const userRef = useRef<User | null>(null);
 
   const [currentView, setCurrentView] = useState<ViewState>(getViewFromPath);
 
@@ -59,6 +62,9 @@ const App: React.FC = () => {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
+  // Keep userRef in sync so async OAuth callbacks read the live user value
+  useEffect(() => { userRef.current = user; }, [user]);
+
   // ── Global Supabase OAuth handler ─────────────────────────────
   // Two-pronged approach to handle race conditions:
   //   1. getSession() on mount: catches the case where Supabase processes
@@ -66,7 +72,7 @@ const App: React.FC = () => {
   //   2. onAuthStateChange: catches normal SIGNED_IN events.
   // Both paths: call backend, then handleLogin. On failure: show login form.
   const processSupabaseSession = useCallback(async (session: any) => {
-    if (!session || user) return;
+    if (!session || userRef.current) return; // use ref to avoid stale closure
     setIsOAuthLoading(true);
     try {
       const provider = session.user?.app_metadata?.provider || 'google';
@@ -113,6 +119,9 @@ const App: React.FC = () => {
       async (_event, session) => {
         if (_event === 'SIGNED_IN' && session) {
           await processSupabaseSession(session);
+        }
+        if (_event === 'SIGNED_OUT') {
+          setIsOAuthLoading(false); // Ensure spinner never shows after logout
         }
       }
     );
@@ -241,10 +250,15 @@ const App: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    await api.auth.logout();
-    setUser(null);
+    setIsOAuthLoading(false);        // Reset spinner state before clearing user
+    setUser(null);                   // Clear React state first
+    userRef.current = null;          // Clear ref immediately (not waiting for effect)
     setPortfolio(null);
-    navigate(ViewState.Dashboard);
+    await api.auth.logout();         // Clear backend JWT
+    if (supabase) {
+      await supabase.auth.signOut(); // Clear Supabase session so getSession() returns null
+    }
+    window.history.replaceState({}, '', '/login');
   };
 
   const handleBuy = async (asset: Asset | WatchlistItem, quantity: number = 1) => {
