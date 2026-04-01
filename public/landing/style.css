@@ -591,7 +591,11 @@ body {
   gap:8px;
 }
 .stat-card:hover { transform:translateY(-5px); background:rgba(255,255,255,0.14); }
-.stat-emoji { font-size:2rem; line-height:1; margin-bottom:4px; }
+.stat-icon-box {
+  width:52px; height:52px; border-radius:14px;
+  background:rgba(255,255,255,0.1); display:grid; place-items:center;
+  margin-bottom:4px;
+}
 .stat-numrow { display:flex; align-items:baseline; gap:3px; }
 .stat-prefix { font-size:1.6rem; font-weight:900; color:#a5b4fc; }
 .stat-num { font-size:2.8rem; font-weight:900; color:#fff; line-height:1; }
@@ -652,7 +656,16 @@ body {
   color: #fff; font-size: 1rem; font-weight: 700; flex-shrink: 0;
 }
 .testi-author strong { display: block; font-size: 0.88rem; }
-.testi-author span { font-size: 0.76rem; color: var(--gray-400); }
+.testi-author span { font-size: 0.76rem; color: var(--gray-400); display:block; }
+
+.signal-pills { display:flex; flex-direction:column; gap:6px; margin-top:14px; }
+.sig-pill {
+  display:inline-block; padding:5px 12px; border-radius:8px;
+  font-size:0.78rem; font-weight:700;
+}
+.sig-buy  { background:#d1fae5; color:#065f46; }
+.sig-hold { background:#fef3c7; color:#92400e; }
+.sig-sell { background:#fee2e2; color:#991b1b; }
 
 /* ═══════ CTA BANNER ═══════ */
 .cta-banner {
