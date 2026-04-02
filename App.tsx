@@ -105,15 +105,9 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!supabase) { setIsOAuthLoading(false); return; }
 
-    // Only process an OAuth session if this looks like an actual OAuth redirect.
-    // The URL will contain #access_token when Supabase redirects back from Google/GitHub.
-    // Without this guard, a stale Supabase session from a previous OAuth login would
-    // silently intercept the manual email/password login flow.
-    const isOAuthRedirect = !!(window.location.hash && window.location.hash.includes('access_token'));
-
-    // 1. Immediately check for existing session (race condition fix for OAuth redirects only)
+    // 1. Immediately check for existing session (race condition fix)
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session && isOAuthRedirect) {
+      if (session) {
         processSupabaseSession(session);
       } else {
         setIsOAuthLoading(false);
@@ -123,8 +117,7 @@ const App: React.FC = () => {
     // 2. Subscribe for future events (normal OAuth flow)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        // Only handle SIGNED_IN if it's an actual OAuth redirect, not a manual login side-effect
-        if (_event === 'SIGNED_IN' && session && isOAuthRedirect) {
+        if (_event === 'SIGNED_IN' && session) {
           await processSupabaseSession(session);
         }
         if (_event === 'SIGNED_OUT') {
