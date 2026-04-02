@@ -89,6 +89,14 @@ export const authService = {
     // Clear any stale demo mode first
     setDemoMode(false);
 
+    // CRITICAL: Sign out from Supabase to clear any lingering OAuth session.
+    // Without this, the onAuthStateChange listener in App.tsx can fire and
+    // override the manual login flow with a stale social session.
+    try {
+      const { supabase: sb } = await import('./supabaseClient');
+      if (sb) await sb.auth.signOut();
+    } catch (_) { /* ignore if supabase not configured */ }
+
     console.log('[Auth] Real login attempt for:', email);
 
     const hashedPassword = await hashPassword(password);
