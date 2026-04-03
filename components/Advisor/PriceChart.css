@@ -1,0 +1,420 @@
+/* ============================================================
+   PriceChart — Metadata card + chart container
+   Matches the existing Advisor.css light/dark token system
+   ============================================================ */
+
+/* ── Card shell ──────────────────────────────────────────── */
+.price-chart-card {
+    margin-top: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.dark .price-chart-card {
+    background: #0f172a;
+    border-color: #1e293b;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Metadata header (Issue 3 fix) ───────────────────────── */
+.chart-meta-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    background: #fafafa;
+}
+
+.dark .chart-meta-header {
+    background: #0f172a;
+    border-bottom-color: #1e293b;
+}
+
+/* Symbol row */
+.chart-meta-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+.chart-meta-symbol-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.chart-symbol {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -0.01em;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+}
+
+.dark .chart-symbol {
+    color: #f1f5f9;
+}
+
+.chart-exchange-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 0.375rem;
+}
+
+.dark .chart-exchange-badge {
+    background: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+}
+
+/* Status badges */
+.chart-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    border-radius: 0.375rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.chart-status-badge.live {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.dark .chart-status-badge.live {
+    background: rgba(22, 163, 74, 0.15);
+    color: #4ade80;
+}
+
+.chart-status-badge.delayed {
+    background: #fef9c3;
+    color: #a16207;
+}
+
+.dark .chart-status-badge.delayed {
+    background: rgba(161, 98, 7, 0.15);
+    color: #facc15;
+}
+
+.chart-status-badge.closed {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.dark .chart-status-badge.closed {
+    background: rgba(107, 114, 128, 0.15);
+    color: #9ca3af;
+}
+
+/* Instrument name row */
+.chart-instrument-name {
+    font-size: 0.8125rem;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+}
+
+.dark .chart-instrument-name {
+    color: #94a3b8;
+}
+
+/* Price + change */
+.chart-meta-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+.chart-ltp {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
+.chart-ltp-na {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.chart-change {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+/* IST timestamp (Issue 4 fix) */
+.chart-timestamp {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.6875rem;
+    color: #9ca3af;
+    margin-top: 0.15rem;
+    white-space: nowrap;
+}
+
+/* ── Multi-instrument tabs ───────────────────────────────── */
+.chart-tab-row {
+    display: flex;
+    gap: 0.375rem;
+    padding: 0.5rem 1.25rem 0;
+    background: #fafafa;
+    border-bottom: 1px solid #e5e7eb;
+    overflow-x: auto;
+}
+
+.dark .chart-tab-row {
+    background: #0f172a;
+    border-bottom-color: #1e293b;
+}
+
+.chart-tab {
+    padding: 0.3rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.chart-tab:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+.chart-tab.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+.dark .chart-tab {
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+.dark .chart-tab:hover {
+    border-color: #3b82f6;
+    color: #60a5fa;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.dark .chart-tab.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+/* ── Interval selector toolbar ───────────────────────────── */
+.chart-interval-row {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.625rem 1.25rem;
+    border-bottom: 1px solid #f3f4f6;
+    flex-wrap: wrap;
+}
+
+.dark .chart-interval-row {
+    border-bottom-color: #1e293b;
+}
+
+.interval-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.interval-btn:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.interval-btn.active {
+    background: #eff6ff;
+    border-color: #2563eb;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.dark .interval-btn {
+    color: #94a3b8;
+}
+
+.dark .interval-btn:hover {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+.dark .interval-btn.active {
+    background: rgba(37, 99, 235, 0.15);
+    border-color: #3b82f6;
+    color: #60a5fa;
+}
+
+.refresh-btn {
+    margin-left: 0.25rem;
+    color: #9ca3af;
+}
+
+.refresh-btn:hover {
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+.external-btn {
+    color: #9ca3af;
+}
+
+.external-btn:hover {
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+/* Delayed candle notice in toolbar */
+.chart-delayed-notice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: auto;
+    font-size: 0.6875rem;
+    color: #a16207;
+    background: #fef9c3;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.dark .chart-delayed-notice {
+    background: rgba(161, 98, 7, 0.15);
+    color: #facc15;
+}
+
+/* ── Chart canvas wrapper ─────────────────────────────────── */
+.chart-area-wrapper {
+    position: relative;
+    min-height: 240px;
+}
+
+.chart-canvas {
+    width: 100%;
+    transition: opacity 0.3s ease;
+}
+
+/* Loading overlay */
+.chart-loading-overlay,
+.chart-error-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #9ca3af;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(2px);
+    z-index: 5;
+}
+
+.dark .chart-loading-overlay,
+.dark .chart-error-overlay {
+    background: rgba(15, 23, 42, 0.85);
+}
+
+.chart-error-overlay {
+    color: #ef4444;
+}
+
+.retry-btn {
+    margin-top: 0.25rem;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #2563eb;
+    background: #eff6ff;
+    border: 1px solid #2563eb;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.retry-btn:hover {
+    background: #dbeafe;
+}
+
+/* Spin animation for loading icon */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* ── Prev close footer ───────────────────────────────────── */
+.chart-prev-close {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+    border-top: 1px solid #f3f4f6;
+    text-align: right;
+}
+
+.dark .chart-prev-close {
+    border-top-color: #1e293b;
+    color: #94a3b8;
+}
+
+.chart-prev-close strong {
+    color: #374151;
+    font-weight: 600;
+}
+
+.dark .chart-prev-close strong {
+    color: #e2e8f0;
+}
