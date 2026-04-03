@@ -20,7 +20,8 @@ import {
     getSessionMessages,
     sendMessage,
     ChatSession,
-    ChatMessageData
+    ChatMessageData,
+    InstrumentQuote,
 } from '../../services/aiChatService';
 import { Asset } from '../../types';
 import './Advisor.css';
@@ -58,65 +59,45 @@ const Advisor: React.FC<AdvisorProps> = ({
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const [lastFollowUps, setLastFollowUps] = useState<string[] | null>(null);
     const [lastInstrumentKeys, setLastInstrumentKeys] = useState<string[] | null>(null);
+    const [lastInstrumentQuotes, setLastInstrumentQuotes] = useState<InstrumentQuote[] | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Scroll to bottom when messages change
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, []);
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages.length, isSending, scrollToBottom]);
+    useEffect(() => { scrollToBottom(); }, [messages.length, isSending, scrollToBottom]);
 
     // Load sessions on mount
     useEffect(() => {
         const loadSessions = async () => {
             setSessionsLoading(true);
-            try {
-                const data = await getSessions(userId);
-                setSessions(data);
-            } catch (error) {
-                console.error('Error loading sessions:', error);
-            } finally {
-                setSessionsLoading(false);
-            }
+            try { setSessions(await getSessions(userId)); }
+            catch (error) { console.error('Error loading sessions:', error); }
+            finally { setSessionsLoading(false); }
         };
-
         loadSessions();
     }, [userId]);
 
     // Load messages when session changes
     useEffect(() => {
         const loadMessages = async () => {
-            if (currentSessionId === null) {
-                setMessages([]);
-                return;
-            }
-
+            if (currentSessionId === null) { setMessages([]); return; }
             setMessagesLoading(true);
-            try {
-                const data = await getSessionMessages(currentSessionId);
-                setMessages(data);
-            } catch (error) {
-                console.error('Error loading messages:', error);
-            } finally {
-                setMessagesLoading(false);
-            }
+            try { setMessages(await getSessionMessages(currentSessionId)); }
+            catch (error) { console.error('Error loading messages:', error); }
+            finally { setMessagesLoading(false); }
         };
-
         loadMessages();
     }, [currentSessionId]);
 
-    // Handle new chat
     const handleNewChat = useCallback(() => {
         setCurrentSessionId(null);
         setMessages([]);
         setIsHistoryOpen(false);
     }, []);
 
-    // Handle session selection
     const handleSelectSession = useCallback((sessionId: number) => {
         if (sessionId !== currentSessionId) {
             setCurrentSessionId(sessionId);
@@ -124,55 +105,42 @@ const Advisor: React.FC<AdvisorProps> = ({
         }
     }, [currentSessionId]);
 
-    // Simulate typing effect
     const simulateTyping = useCallback((fullText: string, messageId: number) => {
         return new Promise<void>((resolve) => {
             let currentIndex = 0;
             const charsPerInterval = 3;
             const intervalMs = 20;
-
             setStreamingMessageId(messageId);
 
             const interval = setInterval(() => {
                 currentIndex += charsPerInterval;
-
                 if (currentIndex >= fullText.length) {
-                    setMessages(prev =>
-                        prev.map(msg =>
-                            msg.id === messageId
-                                ? { ...msg, content: fullText }
-                                : msg
-                        )
-                    );
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === messageId ? { ...msg, content: fullText } : msg
+                    ));
                     setStreamingMessageId(null);
                     clearInterval(interval);
                     resolve();
                 } else {
-                    setMessages(prev =>
-                        prev.map(msg =>
-                            msg.id === messageId
-                                ? { ...msg, content: fullText.slice(0, currentIndex) }
-                                : msg
-                        )
-                    );
+                    setMessages(prev => prev.map(msg =>
+                        msg.id === messageId
+                            ? { ...msg, content: fullText.slice(0, currentIndex) }
+                            : msg
+                    ));
                 }
             }, intervalMs);
         });
     }, []);
 
-    // Handle send message
     const handleSendMessage = useCallback(async (userMessage: string) => {
         if (isSending) return;
-
         setIsSending(true);
 
         try {
             const userMsgId = Date.now();
             const userMsg: ChatMessageData = {
-                id: userMsgId,
-                role: 'user',
-                content: userMessage,
-                createdAt: new Date().toISOString(),
+                id: userMsgId, role: 'user',
+                content: userMessage, createdAt: new Date().toISOString(),
             };
             setMessages(prev => [...prev, userMsg]);
 
@@ -180,77 +148,60 @@ const Advisor: React.FC<AdvisorProps> = ({
 
             if (currentSessionId === null && response.sessionId) {
                 setCurrentSessionId(response.sessionId);
-
-                const newSession: ChatSession = {
+                setSessions(prev => [{
                     id: response.sessionId,
                     title: response.chatTitle,
                     updatedAt: new Date().toISOString(),
-                };
-                setSessions(prev => [newSession, ...prev]);
+                }, ...prev]);
             }
 
             const aiMsgId = Date.now() + 1;
-            const aiMsg: ChatMessageData = {
-                id: aiMsgId,
-                role: 'assistant',
-                content: '',
-                createdAt: new Date().toISOString(),
-            };
-            setMessages(prev => [...prev, aiMsg]);
+            setMessages(prev => [...prev, {
+                id: aiMsgId, role: 'assistant',
+                content: '', createdAt: new Date().toISOString(),
+            }]);
 
             await simulateTyping(response.reply, aiMsgId);
 
-            // Store follow-up suggestions and instrument keys from API response
+            // Store all metadata from response
             setLastFollowUps(response.followUps || null);
             setLastInstrumentKeys(response.instrumentKeys || null);
+            setLastInstrumentQuotes(response.instrumentQuotes || null);  // ← NEW
 
         } catch (error) {
             console.error('Error sending message:', error);
-            const errorMsg: ChatMessageData = {
-                id: Date.now() + 2,
-                role: 'assistant',
+            setMessages(prev => [...prev, {
+                id: Date.now() + 2, role: 'assistant',
                 content: 'Sorry, I encountered an error. Please try again.',
                 createdAt: new Date().toISOString(),
-            };
-            setMessages(prev => [...prev, errorMsg]);
+            }]);
         } finally {
             setIsSending(false);
         }
     }, [isSending, userId, currentSessionId, simulateTyping]);
 
-    // Handle suggestion click
     const handleSuggestionClick = useCallback((suggestion: string) => {
         handleSendMessage(suggestion);
     }, [handleSendMessage]);
 
-    // Get current session title
     const currentSessionTitle = currentSessionId
         ? sessions.find(s => s.id === currentSessionId)?.title || 'Chat'
         : 'New Chat';
 
-    // Check if we're in a new chat state
     const isNewChat = currentSessionId === null && messages.length === 0;
 
-    // Filter sessions for search
     const filteredSessions = sessions.filter(session =>
         session.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Format date with message count
-    const formatSessionMeta = (dateString: string, messageCount?: number): string => {
+    const formatSessionMeta = (dateString: string): string => {
         const date = new Date(dateString);
-        const formattedDate = date.toLocaleDateString('en-US', {
-            month: 'numeric',
-            day: 'numeric',
-            year: 'numeric'
-        });
-        const count = messageCount ?? 2; // Default to 2 if not provided
-        return `${formattedDate} • ${count} messages`;
+        return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
     };
 
     return (
         <div className="advisor-workspace">
-            {/* Top Header / Toolbar */}
+            {/* Top Header */}
             <header className="advisor-header">
                 <div className="header-left">
                     <div className="header-title-group">
@@ -268,11 +219,7 @@ const Advisor: React.FC<AdvisorProps> = ({
                         <History size={16} />
                         <span>History</span>
                     </button>
-                    <button
-                        className="header-btn new-chat-btn-header"
-                        onClick={handleNewChat}
-                        title="New Chat"
-                    >
+                    <button className="header-btn new-chat-btn-header" onClick={handleNewChat} title="New Chat">
                         <Plus size={16} />
                         <span>New Chat</span>
                     </button>
@@ -284,7 +231,6 @@ const Advisor: React.FC<AdvisorProps> = ({
 
             {/* Main Chat Container */}
             <div className="chat-container">
-                {/* Messages Area */}
                 <div className="messages-area">
                     {messagesLoading ? (
                         <div className="messages-loading">
@@ -294,18 +240,13 @@ const Advisor: React.FC<AdvisorProps> = ({
                         </div>
                     ) : isNewChat ? (
                         <div className="welcome-state">
-                            <div className="welcome-icon">
-                                <Sparkles size={32} />
-                            </div>
+                            <div className="welcome-icon"><Sparkles size={32} /></div>
                             <h2>How can I help you today?</h2>
                             <p>I'm DJ-AI, your intelligent wealth advisor. Ask me about your portfolio, market trends, or investment strategies.</p>
-
-
                         </div>
                     ) : (
                         <div className="messages-list">
                             {messages.map((message, index) => {
-                                // Show follow-ups only on the LAST assistant message
                                 const isLastAssistant = streamingMessageId === null
                                     && message.role === 'assistant'
                                     && index === messages.length - 1;
@@ -316,59 +257,41 @@ const Advisor: React.FC<AdvisorProps> = ({
                                         isStreaming={streamingMessageId === message.id}
                                         followUps={isLastAssistant ? lastFollowUps : null}
                                         instrumentKeys={isLastAssistant ? lastInstrumentKeys : null}
+                                        instrumentQuotes={isLastAssistant ? lastInstrumentQuotes : null}
                                         onFollowUpClick={handleSendMessage}
                                     />
                                 );
                             })}
 
-                            {/* Typing indicator */}
                             {isSending && streamingMessageId === null && (
                                 <div className="typing-indicator">
-                                    <div className="typing-avatar">
-                                        <Bot size={16} />
-                                    </div>
+                                    <div className="typing-avatar"><Bot size={16} /></div>
                                     <div className="typing-content">
                                         <span className="typing-text">DJ-AI is typing</span>
                                         <div className="typing-dots">
-                                            <span></span>
-                                            <span></span>
-                                            <span></span>
+                                            <span /><span /><span />
                                         </div>
                                     </div>
                                 </div>
                             )}
-
                             <div ref={messagesEndRef} />
                         </div>
                     )}
                 </div>
 
-                {/* Input Area */}
-                <ChatInput
-                    onSend={handleSendMessage}
-                    isLoading={isSending}
-                />
+                <ChatInput onSend={handleSendMessage} isLoading={isSending} />
             </div>
 
             {/* History Drawer Overlay */}
             {isHistoryOpen && (
-                <div
-                    className="drawer-overlay"
-                    onClick={() => setIsHistoryOpen(false)}
-                />
+                <div className="drawer-overlay" onClick={() => setIsHistoryOpen(false)} />
             )}
 
             {/* History Drawer */}
             <aside className={`history-drawer ${isHistoryOpen ? 'open' : ''}`}>
                 <div className="drawer-header">
-                    <h2>
-                        <History size={16} />
-                        History
-                    </h2>
-                    <button
-                        className="drawer-close"
-                        onClick={() => setIsHistoryOpen(false)}
-                    >
+                    <h2><History size={16} />History</h2>
+                    <button className="drawer-close" onClick={() => setIsHistoryOpen(false)}>
                         <X size={18} />
                     </button>
                 </div>
@@ -376,9 +299,7 @@ const Advisor: React.FC<AdvisorProps> = ({
                 <div className="drawer-sessions">
                     {sessionsLoading ? (
                         <div className="sessions-loading">
-                            {[...Array(5)].map((_, i) => (
-                                <div key={i} className="session-skeleton" />
-                            ))}
+                            {[...Array(5)].map((_, i) => <div key={i} className="session-skeleton" />)}
                         </div>
                     ) : filteredSessions.length === 0 ? (
                         <div className="sessions-empty">
@@ -386,7 +307,7 @@ const Advisor: React.FC<AdvisorProps> = ({
                             <p>No conversations yet</p>
                         </div>
                     ) : (
-                        filteredSessions.map((session) => (
+                        filteredSessions.map(session => (
                             <button
                                 key={session.id}
                                 className={`session-item ${currentSessionId === session.id ? 'active' : ''}`}

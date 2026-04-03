@@ -3,7 +3,7 @@ import React from 'react';
 import { User, Bot, Sparkles, CornerDownRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ChatMessageData } from '../../services/aiChatService';
+import { ChatMessageData, InstrumentQuote } from '../../services/aiChatService';
 import PriceChart from './PriceChart';
 
 interface ChatMessageProps {
@@ -11,20 +11,29 @@ interface ChatMessageProps {
     isStreaming?: boolean;
     followUps?: string[] | null;
     instrumentKeys?: string[] | null;
+    instrumentQuotes?: InstrumentQuote[] | null;   // ← NEW rich metadata
     onFollowUpClick?: (question: string) => void;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followUps, instrumentKeys, onFollowUpClick }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({
+    message,
+    isStreaming,
+    followUps,
+    instrumentKeys,
+    instrumentQuotes,
+    onFollowUpClick,
+}) => {
     const isUser = message.role === 'user';
     const [isCopied, setIsCopied] = React.useState(false);
     const [isThinkingExpanded, setIsThinkingExpanded] = React.useState(false);
 
     const formatTime = (dateString: string): string => {
         const date = new Date(dateString);
-        return date.toLocaleTimeString('en-US', {
+        return date.toLocaleTimeString('en-IN', {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true,
+            timeZone: 'Asia/Kolkata',
         });
     };
 
@@ -38,7 +47,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followU
     const processContent = (content: string) => {
         let processed = content;
 
-        // Remove <think>...</think> blocks
         const thinkMatch = processed.match(/<think>([\s\S]*?)<\/think>/);
         let thinking: string | null = null;
         if (thinkMatch) {
@@ -46,9 +54,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followU
             processed = processed.replace(/<think>[\s\S]*?<\/think>/, '').trim();
         }
 
-        // Strip "## Follow-ups" / "Follow-up Questions" section from the content
-        // to prevent duplicate rendering (buttons are rendered separately)
-        // Handles: -, ‐, ‑, ‒, –, — (all dash/hyphen variants)
         const followUpPatterns = [
             /\n#{1,3}\s*Follow[-\u2010\u2011\u2012\u2013\u2014\s]?[Uu]ps?(?:\s+[Qq]uestions?)?[\s\S]*/i,
             /\n\*\*Follow[-\u2010\u2011\u2012\u2013\u2014\s]?[Uu]ps?(?:\s+[Qq]uestions?)?\*\*[\s\S]*/i,
@@ -62,6 +67,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followU
     };
 
     const { thinking, actualResponse } = processContent(message.content);
+
+    // Determine whether to show the chart:
+    // prefer instrumentQuotes (rich) but fall back to raw keys for backward compat
+    const hasChart = !isUser && !isStreaming &&
+        ((instrumentQuotes && instrumentQuotes.length > 0) ||
+         (instrumentKeys && instrumentKeys.length > 0));
 
     return (
         <div className={`chat-message ${isUser ? 'user' : 'assistant'}`}>
@@ -84,9 +95,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followU
                                         <span>{isThinkingExpanded ? 'Hide thinking process' : 'Show thinking process'}</span>
                                     </button>
                                     {isThinkingExpanded && (
-                                        <div className="thinking-content-text">
-                                            {thinking}
-                                        </div>
+                                        <div className="thinking-content-text">{thinking}</div>
                                     )}
                                 </div>
                             )}
@@ -96,7 +105,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followU
                                     h1: ({ children }) => <h1 className="md-h1">{children}</h1>,
                                     h2: ({ children }) => <h2 className="md-h2">{children}</h2>,
                                     h3: ({ children }) => <h3 className="md-h3">{children}</h3>,
-                                    p: ({ children }) => <p className="md-p">{children}</p>,
+                                    p:  ({ children }) => <p  className="md-p">{children}</p>,
                                     ul: ({ children }) => <ul className="md-ul">{children}</ul>,
                                     ol: ({ children }) => <ol className="md-ol">{children}</ol>,
                                     li: ({ children }) => <li className="md-li">{children}</li>,
@@ -123,9 +132,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followU
                                     ),
                                     thead: ({ children }) => <thead className="md-thead">{children}</thead>,
                                     tbody: ({ children }) => <tbody>{children}</tbody>,
-                                    tr: ({ children }) => <tr className="md-tr">{children}</tr>,
-                                    th: ({ children }) => <th className="md-th">{children}</th>,
-                                    td: ({ children }) => <td className="md-td">{children}</td>,
+                                    tr:   ({ children }) => <tr   className="md-tr">{children}</tr>,
+                                    th:   ({ children }) => <th   className="md-th">{children}</th>,
+                                    td:   ({ children }) => <td   className="md-td">{children}</td>,
                                     hr: () => <hr className="md-hr" />,
                                 }}
                             >
@@ -136,9 +145,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming, followU
                     {isStreaming && <span className="streaming-cursor" />}
                 </div>
 
-                {/* Price Chart */}
-                {!isUser && !isStreaming && instrumentKeys && instrumentKeys.length > 0 && (
-                    <PriceChart instrumentKeys={instrumentKeys} />
+                {/* Price Chart — always driven by instrumentQuotes when available */}
+                {hasChart && (
+                    <PriceChart
+                        instrumentKeys={instrumentKeys || []}
+                        instrumentQuotes={instrumentQuotes || null}
+                    />
                 )}
 
                 {/* Follow-up Buttons */}
