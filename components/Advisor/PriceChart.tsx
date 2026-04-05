@@ -10,7 +10,7 @@ import {
     ExternalLink,
 } from 'lucide-react';
 import { InstrumentQuote } from '../../services/aiChatService';
-import { BASE_URL } from '../../services/apiConfig';
+import { BASE_URL, getHeaders } from '../../services/apiConfig';
 import './PriceChart.css';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -97,7 +97,9 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys, instrumentQuote
         null;
 
     // Derive display fields – always use metadata when available, never split raw key
-    const displaySymbol   = primaryQuote?.tradingSymbol   ?? primaryKey?.split('|')?.[0] ?? '—';
+    // Fallback: key format is "EXCHANGE|ISIN", show the ISIN part trimmed until backend provides symbol
+    const rawKeyFallback  = primaryKey ? primaryKey.split('|')[0] + ':' + (primaryKey.split('|')[1] ?? '') : '—';
+    const displaySymbol   = primaryQuote?.tradingSymbol   ?? rawKeyFallback;
     const displayName     = primaryQuote?.name            ?? 'Unknown Instrument';
     const displayExchange = primaryQuote?.exchange         ?? '—';
     const displayLtp      = primaryQuote?.ltp             ?? null;
@@ -118,7 +120,8 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys, instrumentQuote
         try {
             const url = `${BASE_URL}/api/market/chart/candles`
                 + `?instrumentKey=${encodeURIComponent(key)}&interval=${iv}`;
-            const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+            // Include JWT auth header — candle endpoint is protected
+            const res = await fetch(url, { headers: { ...getHeaders(), 'Content-Type': 'application/json' } });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const json = await res.json();
             const data: CandleData[] = (json.candles ?? json.data ?? json ?? []).map((c: any) => ({
