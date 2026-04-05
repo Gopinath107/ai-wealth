@@ -11,7 +11,8 @@ interface ChatMessageProps {
     isStreaming?: boolean;
     followUps?: string[] | null;
     instrumentKeys?: string[] | null;
-    instrumentQuotes?: InstrumentQuote[] | null;   // ← NEW rich metadata
+    instrumentQuotes?: InstrumentQuote[] | null;   // ← rich metadata
+    userQuery?: string;                             // ← fallback label for chart
     onFollowUpClick?: (question: string) => void;
 }
 
@@ -21,6 +22,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     followUps,
     instrumentKeys,
     instrumentQuotes,
+    userQuery = '',
     onFollowUpClick,
 }) => {
     const isUser = message.role === 'user';
@@ -150,6 +152,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                     <PriceChart
                         instrumentKeys={instrumentKeys || []}
                         instrumentQuotes={instrumentQuotes || null}
+                        userQuery={userQuery}
                     />
                 )}
 

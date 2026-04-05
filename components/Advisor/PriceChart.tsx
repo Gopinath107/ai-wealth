@@ -27,6 +27,7 @@ interface CandleData {
 interface PriceChartProps {
     instrumentKeys: string[];
     instrumentQuotes: InstrumentQuote[] | null;  // Rich metadata from backend
+    userQuery?: string;                           // Fallback label (user's original query)
 }
 
 // ── IST helpers ───────────────────────────────────────────────────────────────
@@ -75,7 +76,7 @@ const DOWN_COLOR = '#ef4444';
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 
-const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys, instrumentQuotes }) => {
+const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys, instrumentQuotes, userQuery = '' }) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef          = useRef<IChartApi | null>(null);
     const candleSeriesRef   = useRef<ISeriesApi<'Candlestick'> | null>(null);
@@ -96,19 +97,27 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys, instrumentQuote
         instrumentQuotes?.[0] ??
         null;
 
-    // Derive display fields – always use metadata when available, never split raw key
-    // Fallback: key format is "EXCHANGE|ISIN", show the ISIN part trimmed until backend provides symbol
-    const rawKeyFallback  = primaryKey ? primaryKey.split('|')[0] + ':' + (primaryKey.split('|')[1] ?? '') : '—';
-    const displaySymbol   = primaryQuote?.tradingSymbol   ?? rawKeyFallback;
-    const displayName     = primaryQuote?.name            ?? 'Unknown Instrument';
-    const displayExchange = primaryQuote?.exchange         ?? '—';
-    const displayLtp      = primaryQuote?.ltp             ?? null;
-    const displayPrevClose  = primaryQuote?.prevClose     ?? null;
-    const displayChange     = primaryQuote?.change        ?? 0;
+    // ── Display fallback chain ─────────────────────────────────────────────────
+    // Priority: instrumentQuotes (rich) → split instrumentKey → userQuery → '—'
+    const rawExchange    = primaryKey?.split('|')?.[0] ?? '';      // e.g. "NSE_EQ"
+    const rawExchangeClean = rawExchange.replace(/_EQ$|_BE$|_MF$|_FO$/, '');  // "NSE"
+    const displaySymbol  = (primaryQuote?.tradingSymbol ?? userQuery) || '—';
+    const displayName    = primaryQuote?.name            ?? (userQuery ? userQuery.replace(/\s*price\s*/i, '').trim() : 'Unknown Instrument');
+    const displayExchange = primaryQuote?.exchange        ?? (rawExchangeClean || '—');
+    const displayLtp     = primaryQuote?.ltp             ?? null;
+    const displayPrevClose  = primaryQuote?.prevClose    ?? null;
+    const displayChange     = primaryQuote?.change       ?? 0;
     const displayChangePct  = primaryQuote?.changePercent ?? 0;
-    const displayAsOf       = primaryQuote?.asOf          ?? null;
-    const displayDelayed    = primaryQuote?.delayed        ?? (displayAsOf ? isStale(displayAsOf) : true);
-    const displayClosed     = primaryQuote?.marketClosed  ?? isMarketClosed();
+    const displayAsOf       = primaryQuote?.asOf         ?? null;
+    const displayDelayed    = primaryQuote?.delayed       ?? (displayAsOf ? isStale(displayAsOf) : true);
+    const displayClosed     = primaryQuote?.marketClosed ?? isMarketClosed();
+
+    // True symbol: from quotes, or fallback to show raw exchange:symbol cleanly
+    const symbolBadge = primaryQuote?.tradingSymbol
+        ? `${displayExchange}: ${primaryQuote.tradingSymbol}`
+        : primaryKey
+        ? `${rawExchangeClean}`
+        : userQuery || '—';
 
     const priceColor = displayChange >= 0 ? UP_COLOR : DOWN_COLOR;
 
@@ -230,14 +239,14 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys, instrumentQuote
     return (
         <div className="price-chart-card">
 
-            {/* ── Instrument Metadata Card (FIX Issue 3) ────────────────────── */}
-            <div className="chart-meta-header">
-                <div className="chart-meta-left">
-                    <div className="chart-meta-symbol-row">
-                        <span className="chart-symbol">{displaySymbol}</span>
-                        <span className="chart-exchange-badge">{displayExchange}</span>
-
-                        {/* Market status badge */}
+            {/* ── Prominent Instrument Identity Header ────────────────────── */}
+            <div className="chart-instrument-identity">
+                <div className="chart-identity-left">
+                    {/* Full instrument name — biggest text */}
+                    <div className="chart-identity-name">{displayName}</div>
+                    {/* Exchange:Symbol badge row */}
+                    <div className="chart-identity-badge-row">
+                        <span className="chart-identity-exchange">{symbolBadge}</span>
                         {displayClosed ? (
                             <span className="chart-status-badge closed">Market Closed</span>
                         ) : displayDelayed ? (
@@ -246,10 +255,9 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys, instrumentQuote
                             <span className="chart-status-badge live">Live</span>
                         )}
                     </div>
-                    <div className="chart-instrument-name">{displayName}</div>
                 </div>
 
-                <div className="chart-meta-right">
+                <div className="chart-identity-right">
                     {displayLtp !== null ? (
                         <>
                             <div className="chart-ltp" style={{ color: priceColor }}>
@@ -266,8 +274,6 @@ const PriceChart: React.FC<PriceChartProps> = ({ instrumentKeys, instrumentQuote
                     ) : (
                         <div className="chart-ltp-na">Price unavailable</div>
                     )}
-
-                    {/* Timestamp (FIX Issue 4) */}
                     {displayAsOf && (
                         <div className="chart-timestamp">
                             <Clock size={11} />

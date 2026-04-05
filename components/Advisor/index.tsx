@@ -60,6 +60,7 @@ const Advisor: React.FC<AdvisorProps> = ({
     const [lastFollowUps, setLastFollowUps] = useState<string[] | null>(null);
     const [lastInstrumentKeys, setLastInstrumentKeys] = useState<string[] | null>(null);
     const [lastInstrumentQuotes, setLastInstrumentQuotes] = useState<InstrumentQuote[] | null>(null);
+    const [lastUserQuery, setLastUserQuery] = useState<string>('');
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -143,6 +144,7 @@ const Advisor: React.FC<AdvisorProps> = ({
                 content: userMessage, createdAt: new Date().toISOString(),
             };
             setMessages(prev => [...prev, userMsg]);
+            setLastUserQuery(userMessage); // capture for chart fallback label
 
             const response = await sendMessage(userId, userMessage, currentSessionId);
 
@@ -258,6 +260,7 @@ const Advisor: React.FC<AdvisorProps> = ({
                                         followUps={isLastAssistant ? lastFollowUps : null}
                                         instrumentKeys={isLastAssistant ? lastInstrumentKeys : null}
                                         instrumentQuotes={isLastAssistant ? lastInstrumentQuotes : null}
+                                        userQuery={isLastAssistant ? lastUserQuery : ''}
                                         onFollowUpClick={handleSendMessage}
                                     />
                                 );

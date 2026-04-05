@@ -19,7 +19,83 @@
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* ── Metadata header (Issue 3 fix) ───────────────────────── */
+/* ── Prominent Instrument Identity Header ─────────────────── */
+.chart-instrument-identity {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem 0.85rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+}
+
+.dark .chart-instrument-identity {
+    background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
+    border-bottom-color: #1e293b;
+}
+
+.chart-identity-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+/* Full instrument name — prominent large text */
+.chart-identity-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+}
+
+.dark .chart-identity-name {
+    color: #f1f5f9;
+}
+
+/* Exchange:Symbol row */
+.chart-identity-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* NSE: GOLDBEES badge */
+.chart-identity-exchange {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #4f46e5;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 0.375rem;
+    padding: 0.15rem 0.55rem;
+    letter-spacing: 0.03em;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.dark .chart-identity-exchange {
+    color: #a5b4fc;
+    background: #1e1b4b;
+    border-color: #3730a3;
+}
+
+/* right side: price + change */
+.chart-identity-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+/* ── Old metadata header (kept for backward compat) ────────── */
 .chart-meta-header {
     display: flex;
     align-items: flex-start;
