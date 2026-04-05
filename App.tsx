@@ -38,10 +38,16 @@ const getViewFromPath = (): ViewState => {
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [appLoading, setAppLoading] = useState(false);
-  // Track OAuth-in-progress using state (not hash check, which doesn't re-render)
-  const [isOAuthLoading, setIsOAuthLoading] = useState<boolean>(
-    !!(window.location.hash && window.location.hash.includes('access_token'))
-  );
+  // Track OAuth-in-progress: covers both legacy hash (#access_token) and PKCE query (?code=)
+  const [isOAuthLoading, setIsOAuthLoading] = useState<boolean>(() => {
+    const hash = window.location.hash || '';
+    const search = window.location.search || '';
+    return (
+      hash.includes('access_token') ||
+      search.includes('code=') ||
+      window.location.pathname === '/auth/callback'
+    );
+  });
   // Ref mirrors user state so async callbacks always read the CURRENT value
   // (avoids stale closure bug in useCallback/useEffect with [] deps)
   const userRef = useRef<User | null>(null);
