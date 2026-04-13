@@ -14,6 +14,7 @@ import { ViewState, Asset, WatchlistItem, Transaction, AssetType, PriceAlert, Re
 import { api } from './services/api';
 import * as chartDataService from './services/chartDataService';
 import { isMarketOpen } from './services/apiConfig';
+import { supabase } from './services/supabaseClient';
 
 // ── Route mapping ──────────────────────────────────────────────
 const VIEW_TO_PATH: Record<ViewState, string> = {
@@ -37,6 +38,19 @@ const getViewFromPath = (): ViewState => {
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [appLoading, setAppLoading] = useState(false);
+  // Track OAuth-in-progress: covers both legacy hash (#access_token) and PKCE query (?code=)
+  const [isOAuthLoading, setIsOAuthLoading] = useState<boolean>(() => {
+    const hash = window.location.hash || '';
+    const search = window.location.search || '';
+    return (
+      hash.includes('access_token') ||
+      search.includes('code=') ||
+      window.location.pathname === '/auth/callback'
+    );
+  });
+  // Ref mirrors user state so async callbacks always read the CURRENT value
+  // (avoids stale closure bug in useCallback/useEffect with [] deps)
+  const userRef = useRef<User | null>(null);
 
   const [currentView, setCurrentView] = useState<ViewState>(getViewFromPath);
 
@@ -54,10 +68,81 @@ const App: React.FC = () => {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
+  // Keep userRef in sync so async OAuth callbacks read the live user value
+  useEffect(() => { userRef.current = user; }, [user]);
+
+  // ── Global Supabase OAuth handler ─────────────────────────────
+  // Two-pronged approach to handle race conditions:
+  //   1. getSession() on mount: catches the case where Supabase processes
+  //      the #access_token hash BEFORE our onAuthStateChange listener registers.
+  //   2. onAuthStateChange: catches normal SIGNED_IN events.
+  // Both paths: call backend, then handleLogin. On failure: show login form.
+  const processSupabaseSession = useCallback(async (session: any) => {
+    if (!session || userRef.current) return; // use ref to avoid stale closure
+    setIsOAuthLoading(true);
+    try {
+      const provider = session.user?.app_metadata?.provider || 'google';
+      const supabaseToken = session.access_token;
+      try {
+        // Primary: call backend for JWT
+        const authResponse = await api.auth.handleAuthCallback(supabaseToken, provider);
+        handleLogin(authResponse.user);
+      } catch (backendErr) {
+        // Fallback: backend unreachable (cold start, etc.) — build user from Supabase session
+        console.warn('[App] Backend call failed, using Supabase session as fallback:', backendErr);
+        const fbUser: User = {
+          id: session.user.id,
+          fullName: session.user.user_metadata?.full_name ||
+                    session.user.user_metadata?.name ||
+                    session.user.email?.split('@')[0] || 'User',
+          email: session.user.email || '',
+          avatar: session.user.user_metadata?.avatar_url ||
+                  session.user.user_metadata?.picture || undefined,
+        };
+        handleLogin(fbUser);
+      }
+    } catch (err) {
+      console.error('[App] OAuth processing error:', err);
+      setIsOAuthLoading(false); // Stop spinner → show login form
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!supabase) { setIsOAuthLoading(false); return; }
+
+    // 1. Immediately check for existing session (race condition fix)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        processSupabaseSession(session);
+      } else {
+        setIsOAuthLoading(false);
+      }
+    });
+
+    // 2. Subscribe for future events (normal OAuth flow)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (_event === 'SIGNED_IN' && session) {
+          await processSupabaseSession(session);
+        }
+        if (_event === 'SIGNED_OUT') {
+          setIsOAuthLoading(false); // Ensure spinner never shows after logout
+        }
+      }
+    );
+    return () => subscription.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Enforce clean URL when not logged in
   useEffect(() => {
-    if (!user && window.location.pathname !== '/') {
-      window.history.replaceState({}, '', '/');
+    if (!user) {
+      const path = window.location.pathname;
+      // Keep /auth/callback and /login paths as-is - needed for OAuth flow and routing
+      if (path !== '/' && path !== '/login' && path !== '/auth/callback') {
+        window.history.replaceState({}, '', '/login');
+      }
     }
   }, [user]);
 
@@ -166,16 +251,20 @@ const App: React.FC = () => {
   const handleLogin = (responseUser: User) => {
     setUser(responseUser);
     loadUserData();
-    if (window.location.pathname === '/' || window.location.pathname === '') {
-      navigate(ViewState.Dashboard);
-    }
+    // Always navigate to dashboard after any login (OAuth, email, demo)
+    navigate(ViewState.Dashboard);
   };
 
   const handleLogout = async () => {
-    await api.auth.logout();
-    setUser(null);
+    setIsOAuthLoading(false);        // Reset spinner state before clearing user
+    setUser(null);                   // Clear React state first
+    userRef.current = null;          // Clear ref immediately (not waiting for effect)
     setPortfolio(null);
-    navigate(ViewState.Dashboard);
+    await api.auth.logout();         // Clear backend JWT
+    if (supabase) {
+      await supabase.auth.signOut(); // Clear Supabase session so getSession() returns null
+    }
+    window.history.replaceState({}, '', '/login');
   };
 
   const handleBuy = async (asset: Asset | WatchlistItem, quantity: number = 1) => {
@@ -255,6 +344,19 @@ const App: React.FC = () => {
     if (window.location.pathname === '/auth/callback') {
       return <AuthCallback onLogin={handleLogin} />;
     }
+    // Show spinner while OAuth is being processed (state-based, not hash-based)
+    if (isOAuthLoading) {
+      return (
+        <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50">
+          <div className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 flex flex-col items-center">
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <h2 className="text-xl font-bold text-slate-800">Signing you in...</h2>
+            <p className="text-slate-500 mt-2 text-sm text-center">Please wait while we verify your account.</p>
+          </div>
+        </div>
+      );
+    }
+    // Show auth screen for /login or / or any unmatched route
     return <Auth onLogin={handleLogin} />;
   }
 

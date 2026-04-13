@@ -15,8 +15,10 @@ type AuthMode = 'LOGIN' | 'SIGNUP' | 'FORGOT_PASSWORD' | 'RESET_PASSWORD';
 const Auth: React.FC<AuthProps> = ({ onLogin }) => {
   const [mode, setMode] = useState<AuthMode>('LOGIN');
   const [isLoading, setIsLoading] = useState(false);
+  const [warmingUp, setWarmingUp] = useState(false); // Shows after 5s of loading
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const loadingTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Form Data
   const [formData, setFormData] = useState({ name: '', email: '', password: '', newPassword: '' });
@@ -26,26 +28,38 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
+    setWarmingUp(false);
     setIsLoading(true);
+
+    // Show "backend waking up" hint after 5 seconds on Render free tier
+    loadingTimerRef.current = setTimeout(() => setWarmingUp(true), 5000);
+
+    // Wrap fetch calls with a 45-second timeout so UI never hangs forever
+    const withTimeout = <T,>(promise: Promise<T>, ms = 45000): Promise<T> => {
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out. The backend may be starting up — please try again in ~30 seconds.')), ms)
+      );
+      return Promise.race([promise, timeout]);
+    };
 
     try {
       if (mode === 'LOGIN') {
-        const response = await api.auth.login(formData.email, formData.password);
+        const response = await withTimeout(api.auth.login(formData.email, formData.password));
         onLogin(response.user);
       } 
       else if (mode === 'SIGNUP') {
-        await api.auth.signup(formData.name, formData.email, formData.password);
+        await withTimeout(api.auth.signup(formData.name, formData.email, formData.password));
         setSuccessMsg("Account created successfully! Please log in.");
         setMode('LOGIN'); 
       }
       else if (mode === 'FORGOT_PASSWORD') {
-        const token = await api.auth.forgotPassword(formData.email);
+        const token = await withTimeout(api.auth.forgotPassword(formData.email));
         setResetToken(token);
         setMode('RESET_PASSWORD');
         setSuccessMsg(`We found your account. Please set a new password.`);
       }
       else if (mode === 'RESET_PASSWORD') {
-        await api.auth.resetPassword(resetToken, formData.newPassword);
+        await withTimeout(api.auth.resetPassword(resetToken, formData.newPassword));
         setSuccessMsg("Password reset successfully. Please login.");
         setTimeout(() => setMode('LOGIN'), 2000);
       }
@@ -53,12 +67,15 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
       console.error(err);
       setError(err.message || 'Authentication failed. Please try again.');
     } finally {
+      if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
       setIsLoading(false);
+      setWarmingUp(false);
     }
   };
 
   const handleDemoLogin = async () => {
       setIsLoading(true);
+      setWarmingUp(false);
       setError('');
       try {
           const response = await api.auth.login(DEMO_USER.email, DEMO_USER.password);
@@ -67,6 +84,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
           setError('Demo login failed. Please try again.');
       } finally {
           setIsLoading(false);
+          setWarmingUp(false);
       }
   };
 
@@ -140,6 +158,14 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
             <div className="p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-center gap-2 animate-fade-in">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
               {error}
+            </div>
+          )}
+
+          {/* Cold-start warm-up notice */}
+          {warmingUp && !error && (
+            <div className="p-4 bg-amber-50 text-amber-700 text-sm rounded-xl border border-amber-100 flex items-center gap-2 animate-fade-in">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+              Backend is waking up (free server cold start) — please wait ~30s...
             </div>
           )}
           
@@ -281,6 +307,9 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     setError('');
                     setIsLoading(true);
                     await api.auth.signInWithOAuth('google');
+                    // Note: page redirects away — isLoading stays true intentionally
+                    // (component unmounts). If redirect fails, reset it:
+                    setTimeout(() => setIsLoading(false), 8000);
                   } catch (err) {
                     setError('Failed to initialize Google login.');
                     setIsLoading(false);
@@ -300,6 +329,9 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
                     setError('');
                     setIsLoading(true);
                     await api.auth.signInWithOAuth('github');
+                    // Note: page redirects away — isLoading stays true intentionally.
+                    // Safety reset if redirect doesn't fire:
+                    setTimeout(() => setIsLoading(false), 8000);
                   } catch (err) {
                     setError('Failed to initialize GitHub login.');
                     setIsLoading(false);
